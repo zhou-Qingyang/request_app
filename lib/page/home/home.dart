@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:quest_app/page/index/index.dart';
 import '../../helper/style.dart';
 import '../../provider/route_state.dart';
+import '../order/order.dart';
 import 'home_bottom_bar.dart';
 
 class HomePage extends StatefulWidget {
@@ -65,7 +66,7 @@ class _HomePageState extends State<HomePage> {
                   controller: routerState.pageController,
                   children: [
                     IndexPage(),
-                    IndexPage(),
+                    OrderPage(),
                     IndexPage(),
                     IndexPage(),
                   ],
