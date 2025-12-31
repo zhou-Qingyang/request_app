@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:quest_app/page/center/center.dart';
 import 'package:quest_app/page/index/index.dart';
 import '../../helper/style.dart';
 import '../../provider/route_state.dart';
@@ -65,9 +66,9 @@ class _HomePageState extends State<HomePage> {
                   onPageChanged: routerState.changeIndex,
                   controller: routerState.pageController,
                   children: [
-                    IndexPage(),
+                    CenterPage(),
                     OrderPage(),
-                    IndexPage(),
+                    CenterPage(),
                     IndexPage(),
                   ],
                 ),

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import '../../helper/style.dart';
 import '../../provider/route_state.dart';
 
 class HomeBottomBar extends StatefulWidget {
@@ -35,7 +36,7 @@ class _HomeBottomBarState extends State<HomeBottomBar>
       child: Icon(
         isActive ? activeIcons[index] : icons[index],
         size: 24.sp,
-        color: isActive ? Colors.blue : Colors.black,
+        color: isActive ? Styles.bottomBarSelected : Styles.bottomBarUnSelected,
       ),
     );
   }
@@ -45,8 +46,8 @@ class _HomeBottomBarState extends State<HomeBottomBar>
       titles[index],
       style: TextStyle(
         fontSize: 14.sp,
-        color: isActive ? Colors.blue : Colors.black,
-        height: 1.2, // 控制行高
+        color: isActive ? Styles.bottomBarSelected : Styles.bottomBarUnSelected,
+        height: 1.2,
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis, // 溢出显示省略号
@@ -55,19 +56,18 @@ class _HomeBottomBarState extends State<HomeBottomBar>
 
   @override
   Widget build(BuildContext context) {
-    // final customColors = Theme.of(context).extension<CustomColors>()!;
     final bottomHeight = MediaQuery.of(context).padding.bottom;
     final currentIndex = context.select((RouterState r) => r.currentIndex);
     return Container(
       height: 60.h + bottomHeight,
       padding: EdgeInsets.only(bottom: bottomHeight),
       decoration: BoxDecoration(
-        // color: customColors.bottomNavigationBarThemeBackground!,
+        color: Colors.white,
       ),
       child: BottomBar(
         currentIndex: currentIndex,
-        unFocusColor: const Color(0xFF9E9E9E),  // 灰色（未选中）
-        focusColor:  const Color(0xFF2196F3),    // 蓝色（选中）
+        unFocusColor: Styles.bottomBarUnSelected,
+        focusColor:  Styles.bottomBarSelected,
         onTap: (index) {
           context.read<RouterState>().changeIndex(index);
         },
@@ -84,6 +84,9 @@ class _HomeBottomBarState extends State<HomeBottomBar>
     );
   }
 }
+
+
+
 
 class BottomBar extends StatefulWidget {
   final List<BottomBarItem> items;
@@ -109,14 +112,13 @@ class _BottomBarState extends State<BottomBar> {
   Widget _createItem(int i) {
     final BottomBarItem item = widget.items[i];
     final bool selected = i == widget.currentIndex;
-
     return Expanded(
       child: Semantics(
         button: true,
         child: InkWell(
           onTap: () => widget.onTap(i),
-          splashColor: Colors.transparent, // 移除点击效果
-          highlightColor: Colors.transparent, // 移除点击效果
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
           child: Container(
             constraints: BoxConstraints(
               minHeight: 60.h,

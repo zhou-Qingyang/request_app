@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 SystemUiOverlayStyle getSystemUiOverlayStyle(bool isDark) {
   if (isDark) {
-    // 深色模式
     return const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,                    // 状态栏背景透明
       statusBarIconBrightness: Brightness. light,            // 状态栏图标亮色
@@ -13,7 +12,6 @@ SystemUiOverlayStyle getSystemUiOverlayStyle(bool isDark) {
       systemNavigationBarDividerColor: Colors.transparent,  // 导航栏分割线透明
     );
   } else {
-    // 浅色模式
     return const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,                    // 状态栏背景透明
       statusBarIconBrightness:  Brightness.dark,             // 状态栏图标暗色
@@ -23,4 +21,22 @@ SystemUiOverlayStyle getSystemUiOverlayStyle(bool isDark) {
       systemNavigationBarDividerColor: Colors. transparent,  // 导航栏分割线透明
     );
   }
+}
+
+class Styles {
+  static Color mainBackground = Color(0xFFF5F5F5);
+  static Color mainFontColor = Color(0xFF262626);
+  static Color grayFontColor = Color(0xFFAEC3FF);
+  static Color orgFontColor = Color(0xFFf76a0c);
+  static Color bluFontColor = Color(0xFF3f70f2);
+
+  static Color chevronRightIconColor = Color(0xFFBBBBBB);
+  static Color themeStartColor = Color(0xFF3a6efd);
+  static Color themeEndColor =  Color(0xFFF5F5F5);
+
+  static Color bottomBarSelected = Color(0xFF406ff4);
+  static Color bottomBarUnSelected = Color(0xFF1f1f1f);
+
+  static Color bellColor = Color(0xFF3b6ffe);
+
 }

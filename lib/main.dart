@@ -46,15 +46,12 @@ class MyApp extends StatelessWidget {
               ),
           ],
           child: MaterialApp(
-            title: 'Gim-Mobile',
+            title: 'WenyiWen',
             themeMode: ThemeMode.light,
             theme: createLightThemeData(),
             darkTheme: createDarkThemeData(),
             routes: {
               RoutesPath.HOME_PAGE: (context) => HomePage(),
-              // RoutesPath.LOGIN_PAGE: (context) => LoginPage(),
-              // RoutesPath.REGISTER_PAGE: (context) => RegisterPage(),
-              // RoutesPath.SEARCH_PAGE: (context) => SearchContact(),
             },
             initialRoute: RoutesPath.HOME_PAGE,
             debugShowCheckedModeBanner: false,
@@ -72,6 +69,8 @@ ThemeData createLightThemeData() {
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       scrolledUnderElevation: 0,
+      elevation: 0,
+      shadowColor: Colors.transparent,
     ),
     dividerColor: Colors.transparent,
     iconButtonTheme: IconButtonThemeData(
