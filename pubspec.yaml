@@ -41,6 +41,8 @@ dependencies:
   extended_text_field: ^16.0.2
   logger: ^2.6.2
   get_it: ^9.2.0
+  intl: ^0.20.2
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:

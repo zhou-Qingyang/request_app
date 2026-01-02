@@ -5,7 +5,7 @@ SystemUiOverlayStyle getSystemUiOverlayStyle(bool isDark) {
   if (isDark) {
     return const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,                    // 状态栏背景透明
-      statusBarIconBrightness: Brightness. light,            // 状态栏图标亮色
+      statusBarIconBrightness: Brightness.light,            // 状态栏图标亮色
       statusBarBrightness: Brightness.dark,                 // iOS 状态栏样式
       systemNavigationBarColor: Color(0xFF000000),          // 底部导航栏黑色
       systemNavigationBarIconBrightness: Brightness.light,  // 导航栏图标亮色
@@ -38,5 +38,5 @@ class Styles {
   static Color bottomBarUnSelected = Color(0xFF1f1f1f);
 
   static Color bellColor = Color(0xFF3b6ffe);
-
+  static Color hexagonBorderColor = Colors.white.withOpacity(0.3);
 }

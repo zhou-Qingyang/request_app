@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
         return _dialogExitApp(context);
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: getSystemUiOverlayStyle(true),
+        value: getSystemUiOverlayStyle(false),
         child: Scaffold(
           extendBodyBehindAppBar: true,
           extendBody: true,

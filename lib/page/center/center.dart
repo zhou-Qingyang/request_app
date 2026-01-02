@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quest_app/page/accept/accept.dart';
+import 'package:quest_app/page/analysis/analysis.dart';
+import 'package:quest_app/page/order/order.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
 
 import '../../helper/style.dart';
@@ -79,9 +82,24 @@ class _CenterPageState extends State<CenterPage> {
 
     iconData = [
       IconDataCenterInfo("assets/images/gpt.png", "情感星球", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "数据分析", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "咨询抢单", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "订单管理", () {}),
+      IconDataCenterInfo("assets/images/gpt.png", "数据分析", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Analysis()),
+        );
+      }),
+      IconDataCenterInfo("assets/images/gpt.png", "咨询抢单", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AcceptPage()),
+        );
+      }),
+      IconDataCenterInfo("assets/images/gpt.png", "订单管理", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => OrderPage()),
+        );
+      }),
       IconDataCenterInfo("assets/images/gpt.png", "成长中心", () {}),
       IconDataCenterInfo("assets/images/gpt.png", "问币商城", () {}),
       IconDataCenterInfo("assets/images/gpt.png", "我的周报", () {}),
@@ -126,12 +144,14 @@ class _CenterPageState extends State<CenterPage> {
           child: Column(
             children: [
               _buildHeadDataCenter(),
-              const SizedBox(height: 110), //上面Stack超出100
+              const SizedBox(height: 110), // 上面Stack超出100
               _buildBanner(),
               const SizedBox(height: 10),
               _buildOrders(),
               const SizedBox(height: 10),
-              const SizedBox(height: 60),
+              _buildClass(),
+              const SizedBox(height: 10),
+              SizedBox(height: 60.h), // 底部导航栏
             ],
           ),
         ),
@@ -146,7 +166,18 @@ class _CenterPageState extends State<CenterPage> {
       clipBehavior: Clip.none,
       children: [
         Container(
-          decoration: BoxDecoration(color: Styles.themeStartColor),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Styles.themeStartColor, // 起始色（原主题色+透明度）
+                Styles.themeStartColor, // 中间色（示例：浅蓝）
+                Styles.themeEndColor, // 结束色（示例：深蓝）
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+          ),
           height: 200,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -490,7 +521,7 @@ class _CenterPageState extends State<CenterPage> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
-        height: 120.h,
+        height: 120,
         padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -598,6 +629,157 @@ class _CenterPageState extends State<CenterPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildClass() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      child: Container(
+        padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "课程上新",
+                    style: TextStyle(
+                      color: Styles.mainFontColor,
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Text(
+                        "全部课程",
+                        style: TextStyle(
+                          color: Styles.chevronRightIconColor,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Icon(
+                        CupertinoIcons.chevron_right,
+                        color: Styles.chevronRightIconColor,
+                        size: 14.sp,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Column(
+              children: [
+                _buildClassItem(
+                  "https://picsum.photos/1920/1080",
+                  "如何获得 答主标签,得到平台的认可？",
+                ),
+                _buildClassDivider(),
+                _buildClassItem(
+                  "https://picsum.photos/1920/1080",
+                  "如何获得 答主标签,得到平台的认可？",
+                ),
+                _buildClassDivider(),
+                _buildClassItem(
+                  "https://picsum.photos/1920/1080",
+                  "如何获得 答主标签,得到平台的认可？",
+                ),
+                const SizedBox(height: 10)
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClassDivider() {
+    return Container(
+      width: double.infinity,
+      height: 1,
+      margin: EdgeInsets.symmetric(vertical: 10.w),
+      decoration: BoxDecoration(color: Styles.mainFontColor.withOpacity(0.1)),
+    );
+  }
+
+
+  Widget _buildClassItem(String imgUrl, String title) {
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12.r),
+          child: Image.network(
+            imgUrl,
+            width: 120.w,
+            height: 80.w,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 14.sp, color: Styles.mainFontColor),
+                maxLines: 3,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "19.0万阅读",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey[600]!,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      print('按钮被点击');
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Color(0xFF3f6ff4), // 文字颜色
+                      side: BorderSide(
+                        color: Color(0xFF3f6ff4).withOpacity(0.1), // 边框颜色
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.r), // 圆角
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 6.h,
+                      ),
+                    ),
+                    child: Text(
+                      '去学习',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
