@@ -4,11 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quest_app/page/order/order_edit.dart';
 import '../../helper/style.dart';
 
-class AnalysisEditBar extends StatelessWidget implements PreferredSizeWidget {
+class AnalysisEditAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double _contentHeight = 44.h;
   final Widget title;
 
-  AnalysisEditBar({Key? key, required this.title}) : super(key: key);
+  AnalysisEditAppBar({Key? key, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,6 @@ class AnalysisEditBar extends StatelessWidget implements PreferredSizeWidget {
       onPressed: onPressed,
     );
   }
-
 
   @override
   Size get preferredSize {

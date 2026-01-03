@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
+import 'package:quest_app/page/analysis/analysis.dart';
 import 'package:quest_app/page/home/home.dart';
 import 'package:quest_app/provider/accept_state.dart';
+import 'package:quest_app/provider/analysis_state.dart';
 import 'package:quest_app/provider/order_state.dart';
 import 'package:quest_app/provider/route_state.dart';
 import 'package:quest_app/router/routes.dart';
@@ -27,6 +29,7 @@ class MyApp extends StatelessWidget {
         child: MultiProvider(
           providers: [
             ChangeNotifierProvider<AcceptState>(create: (_) => AcceptState()),
+            ChangeNotifierProvider<AnalysisState>(create: (_) => AnalysisState()),
             ChangeNotifierProvider<RouterState>(create: (_) => RouterState()),
             ChangeNotifierProvider<OrderState>(create: (_) => OrderState()),
           ],

@@ -6,7 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
+import 'package:quest_app/provider/analysis_state.dart';
 
 import '../../helper/style.dart';
 import 'analysis_appbar.dart';
@@ -31,6 +33,28 @@ class AnalysisData {
     this.resolveRate,
     this.date,
   );
+
+  AnalysisData copyWith({
+    int? orderCount,
+    int? responseRate,
+    int? positiveRate,
+    int? negativeRate,
+    int? repeatCount,
+    int? noLimitOrderCount,
+    int? resolveRate,
+    String? date,
+  }) {
+    return AnalysisData(
+      orderCount ?? this.orderCount,
+      responseRate ?? this.responseRate,
+      positiveRate ?? this.positiveRate,
+      negativeRate ?? this.negativeRate,
+      repeatCount ?? this.repeatCount,
+      noLimitOrderCount ?? this.noLimitOrderCount,
+      resolveRate ?? this.resolveRate,
+      date ?? this.date,
+    );
+  }
 }
 
 class Analysis extends StatefulWidget {
@@ -41,7 +65,10 @@ class Analysis extends StatefulWidget {
 }
 
 class _AnalysisState extends State<Analysis> {
-  late List<AnalysisData> _analysisData;
+  int selectedIndex = 0;
+  int selectedServiceDataIndex = 0;
+  int trendIndex = 0;
+  int filterIndex = 0;
   final List<String> _tableHeaders = [
     '日期',
     '订单量',
@@ -51,10 +78,6 @@ class _AnalysisState extends State<Analysis> {
     '差评数',
     '解决率',
   ];
-  int selectedIndex = 0;
-  int selectedServiceDataIndex = 0;
-  int trendIndex = 0;
-  int filterIndex = 0;
   final List<String> filterTitles = [
     '订单量',
     '5分钟响应率',
@@ -67,17 +90,10 @@ class _AnalysisState extends State<Analysis> {
   final List<String> serviceDataTitles = ['今日', '近7天', '近30天'];
   final List<String> trendTitles = ['近7天', '近30天'];
   final PageController _pageController = PageController(initialPage: 0);
-  final List<String> images = [
-    "https://picsum.photos/1920/1080",
-    "https://picsum.photos/1920/1080",
-    "https://picsum.photos/1920/1080",
-    "https://picsum.photos/1920/1080",
-  ];
 
   @override
   void initState() {
     super.initState();
-    _analysisData = _generate30DaysData();
   }
 
   @override
@@ -86,43 +102,12 @@ class _AnalysisState extends State<Analysis> {
     super.dispose();
   }
 
-  List<AnalysisData> _generate30DaysData() {
-    final List<AnalysisData> data = [];
-    final now = DateTime.now();
-    final dateFormat = DateFormat('yyyy.MM.dd');
-    for (int i = 0; i < 7; i++) {
-      final date = now.subtract(Duration(days: 29 - i));
-      final dateStr = dateFormat.format(date);
-      data.add(
-        AnalysisData(
-          _getRandomInt(50, 200),
-          // 订单数
-          _getRandomInt(80, 100),
-          // 响应率
-          _getRandomInt(85, 98),
-          // 好评率
-          _getRandomInt(1, 5),
-          // 差评率
-          _getRandomInt(10, 50),
-          // 复购数
-          _getRandomInt(5, 30),
-          // 无限额订单数
-          _getRandomInt(88, 99),
-          // 解决率
-          dateStr,
-        ),
-      );
-    }
-    return data;
-  }
-
-  int _getRandomInt(int min, int max) {
-    return min + (max - min) * DateTime.now().microsecond % (max - min + 1);
-  }
-
   @override
   Widget build(BuildContext context) {
     final double paddingHeight = MediaQuery.of(context).padding.top + 44.h;
+    final List<AnalysisData> analysisData = context.select(
+      (AnalysisState r) => r.analyses,
+    );
     return Scaffold(
       backgroundColor: Styles.mainBackground,
       extendBodyBehindAppBar: true,
@@ -139,7 +124,10 @@ class _AnalysisState extends State<Analysis> {
       body: Padding(
         padding: EdgeInsets.only(top: paddingHeight),
         child: Column(
-          children: [_buildAdvancedHorizontalList(), _buildPageView()],
+          children: [
+            _buildAdvancedHorizontalList(),
+            _buildPageView(analysisData),
+          ],
         ),
       ),
     );
@@ -202,7 +190,7 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildPageView() {
+  Widget _buildPageView(List<AnalysisData> data) {
     return Expanded(
       child: PageView.builder(
         controller: _pageController,
@@ -215,7 +203,7 @@ class _AnalysisState extends State<Analysis> {
         itemCount: tabTitles.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            return _buildFirstPage();
+            return _buildFirstPage(data);
           }
           return Container(
             alignment: Alignment.center,
@@ -229,7 +217,7 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildFirstPage() {
+  Widget _buildFirstPage(List<AnalysisData> analysisData) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -269,9 +257,9 @@ class _AnalysisState extends State<Analysis> {
           const SizedBox(height: 70),
           _buildServiceData(),
           const SizedBox(height: 10),
-          _buildLineChart(),
+          _buildLineChart(analysisData),
           const SizedBox(height: 10),
-          _buildFixedColumnTable(),
+          _buildFixedColumnTable(analysisData),
           const SizedBox(height: 10),
         ],
       ),
@@ -401,8 +389,7 @@ class _AnalysisState extends State<Analysis> {
                   bool isSelected = index == selectedServiceDataIndex;
                   return GestureDetector(
                     onTap: () {
-                      setState(() {
-                      });
+                      setState(() {});
                     },
                     child: _buildServiceDataTitle(
                       title: serviceDataTitles[index],
@@ -434,10 +421,10 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildFixedColumnTable() {
+  Widget _buildFixedColumnTable(List<AnalysisData> analysisData) {
     const dateFormatPattern = 'yyyy.MM.dd';
     final dateFormat = DateFormat(dateFormatPattern);
-    final sortedDates = _analysisData.map((AnalysisData i) => i.date).toList()
+    final sortedDates = analysisData.map((AnalysisData i) => i.date).toList()
       ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
     return Padding(
       padding: EdgeInsetsGeometry.symmetric(horizontal: 10.w),
@@ -511,7 +498,7 @@ class _AnalysisState extends State<Analysis> {
                               );
                             }
                             final date = sortedDates[index - 1];
-                            final data = _analysisData.firstWhere(
+                            final data = analysisData.firstWhere(
                               (i) => i.date == date,
                             );
                             return Row(
@@ -600,33 +587,59 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildLineChart() {
+  final Map<int, double Function(AnalysisData)> trendValueGetter = {
+    0: (data) => data.orderCount.toDouble(),
+    1: (data) => data.responseRate.toDouble(),
+    2: (data) => data.repeatCount.toDouble(),
+    3: (data) => data.positiveRate.toDouble(),
+    4: (data) => data.negativeRate.toDouble(),
+    5: (data) => data.resolveRate.toDouble(),
+  };
+
+  (double minValue, double maxValue) getMinMaxByTrendIndex(
+    List<AnalysisData> analysisData,
+    int trendIndex,
+  ) {
+    // 空数据兜底
+    if (analysisData.isEmpty) {
+      return (0.0, 0.0);
+    }
+    final valueGetter = trendValueGetter[trendIndex];
+    if (valueGetter == null) {
+      throw ArgumentError('无效的趋势索引: $trendIndex，仅支持0-5');
+    }
+    final values = analysisData.map((data) => valueGetter(data)).toList();
+    final minValue = values.reduce((a, b) => a < b ? a : b);
+    final maxValue = values.reduce((a, b) => a > b ? a : b);
+    return (minValue, maxValue);
+  }
+
+  Widget _buildLineChart(List<AnalysisData> analysisData) {
+    if (trendIndex == 0) {
+      analysisData = analysisData.sublist(0, 7);
+    }
     const dateFormatPattern = 'yyyy.MM.dd';
     final dateFormat = DateFormat(dateFormatPattern);
-    final sortedDates = _analysisData.map((AnalysisData i) => i.date).toList()
+    final sortedDates = analysisData.map((AnalysisData i) => i.date).toList()
       ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
-    final sortedData = List<AnalysisData>.from(_analysisData)
+    final sortedData = List<AnalysisData>.from(analysisData)
       ..sort(
         (a, b) => dateFormat.parse(a.date).compareTo(dateFormat.parse(b.date)),
       );
-
-    final Map<int, double Function(AnalysisData)> trendValueGetter = {
-      0: (data) => data.orderCount.toDouble(),
-      1: (data) => data.responseRate.toDouble(),
-      2: (data) => data.repeatCount.toDouble(),
-      3: (data) => data.positiveRate.toDouble(),
-      4: (data) => data.negativeRate.toDouble(),
-      5: (data) => data.resolveRate.toDouble(),
-    };
+    final (minValue, maxValue) = getMinMaxByTrendIndex(
+      analysisData,
+      filterIndex,
+    );
     final resolveRateSpots = sortedData.asMap().entries.map((entry) {
       final index = entry.key;
       final data = entry.value;
-      final valueGetter = trendValueGetter[trendIndex];
+      final valueGetter = trendValueGetter[filterIndex];
       if (valueGetter == null) {
         return FlSpot(index.toDouble(), 0.0);
       }
       return FlSpot(index.toDouble(), valueGetter(data));
     }).toList();
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
@@ -697,31 +710,52 @@ class _AnalysisState extends State<Analysis> {
                           final dateStr = date.split('.').sublist(1).join('');
                           String valueName;
                           double value;
-                          switch (trendIndex) {
+                          switch (filterIndex) {
                             case 0:
                               valueName = '订单量';
-                              value = _analysisData
+                              value = analysisData
                                   .firstWhere((d) => d.date == date)
                                   .orderCount
                                   .toDouble();
                               break;
                             case 1:
                               valueName = '5分钟响应率';
-                              value = _analysisData
+                              value = analysisData
                                   .firstWhere((d) => d.date == date)
                                   .responseRate
                                   .toDouble();
                               break;
                             case 2:
                               valueName = '复购数';
-                              value = _analysisData
+                              value = analysisData
                                   .firstWhere((d) => d.date == date)
                                   .repeatCount
                                   .toDouble();
                               break;
+                            case 3:
+                              valueName = '好评数';
+                              value = analysisData
+                                  .firstWhere((d) => d.date == date)
+                                  .positiveRate
+                                  .toDouble();
+                              break;
+                            case 4:
+                              valueName = '差评数';
+                              value = analysisData
+                                  .firstWhere((d) => d.date == date)
+                                  .negativeRate
+                                  .toDouble();
+                              break;
+                            case 4:
+                              valueName = '解决率';
+                              value = analysisData
+                                  .firstWhere((d) => d.date == date)
+                                  .resolveRate
+                                  .toDouble();
+                              break;
                             default:
                               valueName = '数值';
-                              value = spot.y / 2;
+                              value = spot.y;
                           }
                           return LineTooltipItem(
                             '',
@@ -768,7 +802,7 @@ class _AnalysisState extends State<Analysis> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 20,
-                        interval: 1,
+                        interval: trendIndex == 0 ? 1 : 4,
                         getTitlesWidget: (value, meta) {
                           final index = value.toInt();
                           if (index < 0 || index >= sortedDates.length) {
@@ -799,12 +833,12 @@ class _AnalysisState extends State<Analysis> {
                   ),
                   minX: -1,
                   maxX: (sortedDates.length).toDouble(),
-                  minY: 160,
-                  maxY: 200,
+                  minY: minValue,
+                  maxY: maxValue,
                   lineBarsData: [
                     LineChartBarData(
                       spots: resolveRateSpots
-                          .map((e) => FlSpot(e.x, e.y * 2))
+                          .map((e) => FlSpot(e.x, e.y))
                           .toList(),
                       isCurved: true,
                       color: Color(0xFF3457ce),
@@ -831,11 +865,11 @@ class _AnalysisState extends State<Analysis> {
         physics: const ClampingScrollPhysics(),
         itemCount: filterTitles.length,
         itemBuilder: (context, index) {
-          bool isSelected = index == trendIndex;
+          bool isSelected = index == filterIndex;
           return _buildCustomButton(
             title: filterTitles[index],
             isSelected: isSelected,
-            onTap: () => setState(() => trendIndex = index),
+            onTap: () => setState(() => filterIndex = index),
           );
         },
       ),
