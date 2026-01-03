@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:quest_app/page/accept/accept.dart';
 import 'package:quest_app/page/analysis/analysis.dart';
 import 'package:quest_app/page/order/order.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
+import 'package:quest_app/provider/route_state.dart';
 
 import '../../helper/style.dart';
 
@@ -89,10 +91,11 @@ class _CenterPageState extends State<CenterPage> {
         );
       }),
       IconDataCenterInfo("assets/images/gpt.png", "咨询抢单", () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => AcceptPage()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => AcceptPage()),
+        // );
+        context.read<RouterState>().changeIndex(1);
       }),
       IconDataCenterInfo("assets/images/gpt.png", "订单管理", () {
         Navigator.push(

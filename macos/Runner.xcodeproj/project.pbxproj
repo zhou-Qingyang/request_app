@@ -15,7 +15,7 @@
 			);
 			dependencies = (
 			);
-			name = "Flutter Assemble";
+			me = "Flutter Assemble";
 			productName = FLX;
 		};
 /* End PBXAggregateTarget section */

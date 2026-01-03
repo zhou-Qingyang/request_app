@@ -1,13 +1,11 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:quest_app/page/accept/accept_edit.dart';
 import 'package:quest_app/page/accept/progress.dart';
-import 'package:quest_app/page/order/order_appbar.dart';
-import 'package:quest_app/page/widgets/main_appbar.dart';
+import 'package:quest_app/provider/accept_state.dart';
 import '../../helper/style.dart';
 
 class AcceptPage extends StatefulWidget {
@@ -17,130 +15,42 @@ class AcceptPage extends StatefulWidget {
   State<AcceptPage> createState() => _AcceptPageState();
 }
 
-class OrderInfo {
-  final String fromName;
-  final String avatarUrl;
-  final String status;
-  final String question;
-  final String date;
-  final String type;
+class AcceptInfo {
+  final int id;
+  final String title;
+  final String money;
+  final String score;
 
-  OrderInfo(
-    this.fromName,
-    this.status,
-    this.question,
-    this.date,
-    this.type,
-    this.avatarUrl,
-  );
+  AcceptInfo(this.id, this.title, this.money, this.score);
+
+  AcceptInfo copyWith({int? id, String? title, String? money, String? score}) {
+    return AcceptInfo(
+      id ?? this.id,
+      title ?? this.title,
+      money ?? this.money,
+      score ?? this.score,
+    );
+  }
 }
 
 class _AcceptPageState extends State<AcceptPage> {
-  final PageController _pageController = PageController();
-  late PageController _bannerPageController = PageController();
-  int _currentPage = 0;
-  final List<String> buttonTitles = ['全部', '已预约', '待应答', '进行中', '已完成', '退款'];
-  int selectedIndex = 0;
-
-  // 模拟数据源（20条）
-  late List<OrderInfo> _allOrderData;
-
-  // 显示的列表数据
-  List<OrderInfo> _displayOrderData = [];
-
-  // 每次加载数量
-  static const int _loadCount = 5;
-
-  // 滚动控制器
-  final ScrollController _scrollController = ScrollController();
-
-  // 是否正在加载
-  bool _isLoading = false;
+  // final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _allOrderData = _generateFakeOrderData(20);
-    _loadMoreData();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 100 &&
-          !_isLoading &&
-          _displayOrderData.length < _allOrderData.length) {
-        _loadMoreData();
-      }
-    });
-  }
-
-  Future<void> _loadMoreData() async {
-    if (_isLoading) return;
-    setState(() {
-      _isLoading = true;
-    });
-    await Future.delayed(const Duration(microseconds: 800));
-    setState(() {
-      final int startIndex = _displayOrderData.length;
-      int endIndex = startIndex + _loadCount;
-      if (endIndex > _allOrderData.length) {
-        endIndex = _allOrderData.length;
-      }
-      _displayOrderData.addAll(_allOrderData.sublist(startIndex, endIndex));
-      _isLoading = false;
-    });
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _bannerPageController.dispose();
-    _scrollController.dispose();
+    // if (_scrollController != null) {
+    //   _scrollController.dispose(); // 确保控制器释放
+    // }
+    // _scrollController.dispose();
     super.dispose();
   }
 
-  // 生成伪造的订单数据
-  List<OrderInfo> _generateFakeOrderData(int count) {
-    final List<String> names = [
-      "张三",
-      "李四",
-      "王五",
-      "赵六",
-      "钱七",
-      "孙八",
-      "周九",
-      "吴十",
-      "郑十一",
-      "冯十二",
-    ];
-    final List<String> statusList = ["待处理", "处理中", "已完成", "已取消", "已驳回"];
-    final List<String> questions = [
-      "商品质量问题",
-      "物流配送延迟",
-      "退款申请处理",
-      "售后客服响应慢",
-      "商品与描述不符",
-      "包装破损",
-      "少发漏发商品",
-      "发票开具问题",
-    ];
-    final List<String> dates = List.generate(30, (index) {
-      return "2026-01-${index + 1 < 10 ? '0${index + 1}' : index + 1}";
-    });
-    final List<String> types = ["售后咨询", "投诉建议", "订单查询", "退款申请", "物流咨询"];
-    final Random random = Random();
-    return List.generate(count, (index) {
-      return OrderInfo(
-        names[random.nextInt(names.length)],
-        statusList[random.nextInt(statusList.length)],
-        questions[random.nextInt(questions.length)],
-        dates[random.nextInt(dates.length)],
-        types[random.nextInt(types.length)],
-        "https://picsum.photos/200",
-      );
-    });
-  }
-
   double _progress = 0.3;
-
 
   void _updateProgress() {
     setState(() {
@@ -148,12 +58,14 @@ class _AcceptPageState extends State<AcceptPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     final double _contentHeight = 44.h;
     final statusBarHeight = MediaQuery.of(context).padding.top;
     final double paddingHeight = _contentHeight + statusBarHeight;
+    final List<AcceptInfo> accepts = context.select(
+      (AcceptState r) => r.accepts,
+    );
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: getSystemUiOverlayStyle(false),
       child: Scaffold(
@@ -172,7 +84,7 @@ class _AcceptPageState extends State<AcceptPage> {
                     height: 200,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage("https://picsum.photos/200"), // 本地图片路径
+                        image: NetworkImage("https://picsum.photos/200"),
                         fit: BoxFit.cover, // 图片适配方式（关键，下文详解）
                       ),
                     ),
@@ -204,7 +116,7 @@ class _AcceptPageState extends State<AcceptPage> {
                                   padding: EdgeInsets.only(left: 8, right: 8),
                                   height: _contentHeight * 0.6,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1), // 淡色背景
+                                    color: Colors.white.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(
                                       20,
                                     ), // 可选：添加圆角
@@ -212,7 +124,12 @@ class _AcceptPageState extends State<AcceptPage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      _createButton(CupertinoIcons.cube, () {}),
+                                      _createButton(CupertinoIcons.cube, () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => AcceptEditPage()),
+                                        );
+                                      }),
                                       _buildDivider(),
                                       _createButton(CupertinoIcons.cube, () {}),
                                     ],
@@ -272,7 +189,7 @@ class _AcceptPageState extends State<AcceptPage> {
                                 child: DotProgressBar(
                                   progress: 0,
                                   height: 10,
-                                  dotSize: 18,
+                                  dotSize: 8,
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -318,7 +235,8 @@ class _AcceptPageState extends State<AcceptPage> {
                                           WidgetSpan(
                                             child: Icon(
                                               Icons.help_outline,
-                                              color: Styles.chevronRightIconColor,
+                                              color:
+                                                  Styles.chevronRightIconColor,
                                               size: 14.sp,
                                             ),
                                           ),
@@ -334,26 +252,127 @@ class _AcceptPageState extends State<AcceptPage> {
                       ],
                     ),
                   ),
-                  Positioned(
-                    top: 160,
-                    left: 10.w,
-                    right: 10.w,
-                    child: Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 170),
-              _buildClass(),
+              Transform(
+                transform: Matrix4.translationValues(0, -40, 0),
+                origin: Offset(0, 0),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 10.w,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: List.generate(accepts.length, (index) {
+                        return Column(
+                          children: [
+                            _buildAcceptItem(accepts[index]),
+                            const SizedBox(height: 6),
+                            if (index != accepts.length - 1)
+                              Divider(
+                                color: Colors.grey[200],
+                                thickness: 1.w,
+                                height: 1.h,
+                              ),
+                            const SizedBox(height: 6),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ),
+             const SizedBox(height: 20),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAcceptItem(AcceptInfo accept) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          accept.title,
+          maxLines: 3,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.bold,
+            color: Styles.mainFontColor,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            RichText(
+              text: TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 4.w),
+                      child: Icon(Icons.add, size: 14.sp, color: Colors.red),
+                    ),
+                  ),
+                  TextSpan(
+                    text: accept.money,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.red,
+                    ),
+                  ),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 2.w, right: 2.w),
+                      child: Icon(Icons.add, size: 14.sp, color: Colors.red),
+                    ),
+                  ),
+                  TextSpan(
+                    text: "${accept.score}问贝",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Icon(
+                  Icons.source,
+                  size: 14.sp,
+                  color: Styles.themeStartColor,
+                ),
+                SizedBox(width: 4.w),
+                Text(
+                  "去抢单",
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Styles.themeStartColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -441,7 +460,7 @@ class _AcceptPageState extends State<AcceptPage> {
                   "https://picsum.photos/1920/1080",
                   "如何获得 答主标签,得到平台的认可？",
                 ),
-                const SizedBox(height: 10)
+                const SizedBox(height: 10),
               ],
             ),
           ],
@@ -480,10 +499,7 @@ class _AcceptPageState extends State<AcceptPage> {
                 children: [
                   Text(
                     "19.0万阅读",
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey[600]!,
-                    ),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]!),
                   ),
                   TextButton(
                     onPressed: () {
@@ -528,5 +544,4 @@ class _AcceptPageState extends State<AcceptPage> {
       decoration: BoxDecoration(color: Styles.mainFontColor.withOpacity(0.1)),
     );
   }
-
 }

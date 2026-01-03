@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quest_app/page/order/order_edit.dart';
 import '../../helper/style.dart';
 
 class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -52,7 +53,12 @@ class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _createButton(CupertinoIcons.cube, () {}),
+                        _createButton(CupertinoIcons.cube, () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => OrderEditPage()),
+                          );
+                        }),
                         _buildDivider(),
                         _createButton(CupertinoIcons.cube, () {}),
                       ],

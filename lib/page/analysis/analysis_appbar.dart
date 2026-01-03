@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quest_app/page/analysis/analysis_edit_bar.dart';
 import '../../helper/style.dart';
+import '../accept/accept_edit.dart';
 
 class AnalysisAppbar extends StatelessWidget implements PreferredSizeWidget {
   final double _contentHeight = 44.h;
@@ -45,7 +47,12 @@ class AnalysisAppbar extends StatelessWidget implements PreferredSizeWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _createButton(CupertinoIcons.cube, () {}),
+                        _createButton(CupertinoIcons.cube, () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => AcceptEditPage()),
+                          );
+                        }),
                         _buildDivider(),
                         _createButton(CupertinoIcons.cube, () {}),
                       ],

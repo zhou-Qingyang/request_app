@@ -58,19 +58,19 @@ class _DotProgressBarState extends State<DotProgressBar> {
             ),
           ),
         ),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          width: progressBarActualWidth,
-          height: widget.height,
-          margin: EdgeInsets.only(left: widget.dotLeftPadding),
-          decoration: BoxDecoration(
-            color: widget.progressColor,
-            borderRadius: BorderRadius.circular(widget.height / 2),
-          ),
-        ),
+        // AnimatedContainer(
+        //   duration: const Duration(milliseconds: 300),
+        //   width: progressBarActualWidth,
+        //   height: widget.height,
+        //   margin: EdgeInsets.only(left: widget.dotLeftPadding),
+        //   decoration: BoxDecoration(
+        //     color: widget.progressColor,
+        //     borderRadius: BorderRadius.circular(widget.height / 2),
+        //   ),
+        // ),
         AnimatedPositioned(
           duration: const Duration(milliseconds: 300),
-          left: dotFinalLeft, // 使用最终计算的左偏移
+          left: dotFinalLeft + 6,
           top: (widget.height - widget.dotSize) / 2,
           child: Container(
             width: widget.dotSize,

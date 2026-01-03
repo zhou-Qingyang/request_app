@@ -3,11 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:provider/provider.dart';
 import 'package:quest_app/page/home/home.dart';
+import 'package:quest_app/provider/accept_state.dart';
+import 'package:quest_app/provider/order_state.dart';
 import 'package:quest_app/provider/route_state.dart';
 import 'package:quest_app/router/routes.dart';
 
 import 'helper/custom_theme.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -22,37 +23,19 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       designSize: const Size(375.0, 812.0),
-      builder:
-          (context, child) => OKToast(
+      builder: (context, child) => OKToast(
         child: MultiProvider(
-          // providers: [
-          //   ChangeNotifierProvider<AppThemeState>(
-          //     create: (_) => AppThemeState('light'),
-          //   ),
-
-          //   ChangeNotifierProvider<MessageState>(
-          //     create: (_) => MessageState(),
-          //   ),
-          //   ChangeNotifierProvider<DiscoverState>(
-          //     create: (_) => DiscoverState(),
-          //   ),
-          //   ChangeNotifierProvider<ContactState>(
-          //     create: (_) => ContactState(),
-          //   ),
-          // ],
           providers: [
-              ChangeNotifierProvider<RouterState>(
-                create: (_) => RouterState(),
-              ),
+            ChangeNotifierProvider<AcceptState>(create: (_) => AcceptState()),
+            ChangeNotifierProvider<RouterState>(create: (_) => RouterState()),
+            ChangeNotifierProvider<OrderState>(create: (_) => OrderState()),
           ],
           child: MaterialApp(
             title: 'WenyiWen',
             themeMode: ThemeMode.light,
             theme: createLightThemeData(),
             darkTheme: createDarkThemeData(),
-            routes: {
-              RoutesPath.HOME_PAGE: (context) => HomePage(),
-            },
+            routes: {RoutesPath.HOME_PAGE: (context) => HomePage()},
             initialRoute: RoutesPath.HOME_PAGE,
             debugShowCheckedModeBanner: false,
           ),

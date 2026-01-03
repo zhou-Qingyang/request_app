@@ -5,6 +5,7 @@ import 'package:quest_app/page/center/center.dart';
 import 'package:quest_app/page/index/index.dart';
 import '../../helper/style.dart';
 import '../../provider/route_state.dart';
+import '../accept/accept.dart';
 import '../order/order.dart';
 import 'home_bottom_bar.dart';
 
@@ -67,7 +68,7 @@ class _HomePageState extends State<HomePage> {
                   controller: routerState.pageController,
                   children: [
                     CenterPage(),
-                    OrderPage(),
+                    AcceptPage(),
                     CenterPage(),
                     IndexPage(),
                   ],

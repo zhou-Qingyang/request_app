@@ -19,6 +19,7 @@ class AnalysisData {
   final int repeatCount;
   final int noLimitOrderCount;
   final int resolveRate;
+  final String date;
 
   AnalysisData(
     this.orderCount,
@@ -28,6 +29,7 @@ class AnalysisData {
     this.repeatCount,
     this.noLimitOrderCount,
     this.resolveRate,
+    this.date,
   );
 }
 
@@ -39,7 +41,7 @@ class Analysis extends StatefulWidget {
 }
 
 class _AnalysisState extends State<Analysis> {
-  late Map<String, AnalysisData> _analysisDataMap;
+  late List<AnalysisData> _analysisData;
   final List<String> _tableHeaders = [
     '日期',
     '订单量',
@@ -53,13 +55,14 @@ class _AnalysisState extends State<Analysis> {
   int selectedServiceDataIndex = 0;
   int trendIndex = 0;
   int filterIndex = 0;
-  final List<String> filterTitles = ['订单量',
+  final List<String> filterTitles = [
+    '订单量',
     '5分钟响应率',
     '复购数',
     '好评数',
     '差评数',
-    '解决率',];
-
+    '解决率',
+  ];
   final List<String> tabTitles = ['服务分析', '商品分析', '收益分析'];
   final List<String> serviceDataTitles = ['今日', '近7天', '近30天'];
   final List<String> trendTitles = ['近7天', '近30天'];
@@ -70,12 +73,11 @@ class _AnalysisState extends State<Analysis> {
     "https://picsum.photos/1920/1080",
     "https://picsum.photos/1920/1080",
   ];
-  int _currentBannerPage = 0;
 
   @override
   void initState() {
     super.initState();
-    _analysisDataMap = _generate30DaysData();
+    _analysisData = _generate30DaysData();
   }
 
   @override
@@ -84,32 +86,34 @@ class _AnalysisState extends State<Analysis> {
     super.dispose();
   }
 
-  Map<String, AnalysisData> _generate30DaysData() {
-    final Map<String, AnalysisData> dataMap = {};
+  List<AnalysisData> _generate30DaysData() {
+    final List<AnalysisData> data = [];
     final now = DateTime.now();
     final dateFormat = DateFormat('yyyy.MM.dd');
-    // 生成近30天日期 + 随机模拟数据
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 7; i++) {
       final date = now.subtract(Duration(days: 29 - i));
       final dateStr = dateFormat.format(date);
-
-      dataMap[dateStr] = AnalysisData(
-        _getRandomInt(50, 200),
-        // 订单数
-        _getRandomInt(80, 100),
-        // 响应率
-        _getRandomInt(85, 98),
-        // 好评率
-        _getRandomInt(1, 5),
-        // 差评率
-        _getRandomInt(10, 50),
-        // 复购数
-        _getRandomInt(5, 30),
-        // 无限额订单数
-        _getRandomInt(88, 99), // 解决率
+      data.add(
+        AnalysisData(
+          _getRandomInt(50, 200),
+          // 订单数
+          _getRandomInt(80, 100),
+          // 响应率
+          _getRandomInt(85, 98),
+          // 好评率
+          _getRandomInt(1, 5),
+          // 差评率
+          _getRandomInt(10, 50),
+          // 复购数
+          _getRandomInt(5, 30),
+          // 无限额订单数
+          _getRandomInt(88, 99),
+          // 解决率
+          dateStr,
+        ),
       );
     }
-    return dataMap;
+    return data;
   }
 
   int _getRandomInt(int min, int max) {
@@ -246,9 +250,11 @@ class _AnalysisState extends State<Analysis> {
                   ),
                 ),
                 height: 300,
-                child: Center(
-                  child: HexagonIndicatorWidget(
-                    size: 280.w, // 六边形整体尺寸（适配屏幕宽度）
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Align(
+                    child: HexagonIndicatorWidget(size: 200),
+                    alignment: Alignment.topCenter,
                   ),
                 ),
               ),
@@ -266,6 +272,7 @@ class _AnalysisState extends State<Analysis> {
           _buildLineChart(),
           const SizedBox(height: 10),
           _buildFixedColumnTable(),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -291,8 +298,9 @@ class _AnalysisState extends State<Analysis> {
                   Text(
                     "服务能力解读",
                     style: TextStyle(
-                      color: Styles.mainFontColor,
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                   SizedBox(width: 4.w),
@@ -377,8 +385,9 @@ class _AnalysisState extends State<Analysis> {
                 Text(
                   "服务数据",
                   style: TextStyle(
-                    color: Styles.mainFontColor,
-                    fontSize: 16.sp,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
                 SizedBox(width: 4.w),
@@ -393,7 +402,6 @@ class _AnalysisState extends State<Analysis> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        selectedServiceDataIndex = index;
                       });
                     },
                     child: _buildServiceDataTitle(
@@ -427,16 +435,14 @@ class _AnalysisState extends State<Analysis> {
   }
 
   Widget _buildFixedColumnTable() {
-    final sortedDates = _analysisDataMap.keys.toList()
-      ..sort(
-        (a, b) => DateFormat(
-          'yyyy.MM.dd',
-        ).parse(a).compareTo(DateFormat('yyyy.MM.dd').parse(b)),
-      );
+    const dateFormatPattern = 'yyyy.MM.dd';
+    final dateFormat = DateFormat(dateFormatPattern);
+    final sortedDates = _analysisData.map((AnalysisData i) => i.date).toList()
+      ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
     return Padding(
       padding: EdgeInsetsGeometry.symmetric(horizontal: 10.w),
       child: Container(
-        height: 400,
+        height: 200,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
@@ -505,7 +511,9 @@ class _AnalysisState extends State<Analysis> {
                               );
                             }
                             final date = sortedDates[index - 1];
-                            final data = _analysisDataMap[date]!;
+                            final data = _analysisData.firstWhere(
+                              (i) => i.date == date,
+                            );
                             return Row(
                               children: [
                                 Expanded(
@@ -592,34 +600,37 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  // 3. 构建多维度折线图（以订单数、复购数、解决率为例）
   Widget _buildLineChart() {
-    final sortedDates = _analysisDataMap.keys.toList()
+    const dateFormatPattern = 'yyyy.MM.dd';
+    final dateFormat = DateFormat(dateFormatPattern);
+    final sortedDates = _analysisData.map((AnalysisData i) => i.date).toList()
+      ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
+    final sortedData = List<AnalysisData>.from(_analysisData)
       ..sort(
-        (a, b) => DateFormat(
-          'yyyy.MM.dd',
-        ).parse(a).compareTo(DateFormat('yyyy.MM.dd').parse(b)),
+        (a, b) => dateFormat.parse(a.date).compareTo(dateFormat.parse(b.date)),
       );
-    final orderCountSpots = sortedDates.asMap().entries.map((entry) {
-      final index = entry.key;
-      final data = _analysisDataMap[entry.value]!;
-      return FlSpot(index.toDouble(), data.orderCount.toDouble());
-    }).toList();
-    final repeatCountSpots = sortedDates.asMap().entries.map((entry) {
-      final index = entry.key;
-      final data = _analysisDataMap[entry.value]!;
-      return FlSpot(index.toDouble(), data.repeatCount.toDouble());
-    }).toList();
 
-    final resolveRateSpots = sortedDates.asMap().entries.map((entry) {
+    final Map<int, double Function(AnalysisData)> trendValueGetter = {
+      0: (data) => data.orderCount.toDouble(),
+      1: (data) => data.responseRate.toDouble(),
+      2: (data) => data.repeatCount.toDouble(),
+      3: (data) => data.positiveRate.toDouble(),
+      4: (data) => data.negativeRate.toDouble(),
+      5: (data) => data.resolveRate.toDouble(),
+    };
+    final resolveRateSpots = sortedData.asMap().entries.map((entry) {
       final index = entry.key;
-      final data = _analysisDataMap[entry.value]!;
-      return FlSpot(index.toDouble(), data.resolveRate.toDouble());
+      final data = entry.value;
+      final valueGetter = trendValueGetter[trendIndex];
+      if (valueGetter == null) {
+        return FlSpot(index.toDouble(), 0.0);
+      }
+      return FlSpot(index.toDouble(), valueGetter(data));
     }).toList();
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
-        height: 500,
+        height: 300,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
@@ -632,8 +643,9 @@ class _AnalysisState extends State<Analysis> {
                 Text(
                   "趋势分析",
                   style: TextStyle(
-                    color: Styles.mainFontColor,
-                    fontSize: 16.sp,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
                 SizedBox(width: 4.w),
@@ -659,98 +671,148 @@ class _AnalysisState extends State<Analysis> {
                 }),
               ],
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             _buildAdvancedHorizontalList2(),
-            const SizedBox(height:10),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(color: Colors.grey[100]!, blurRadius: 4),
-                  ],
-                ),
-                child: LineChart(
-                  LineChartData(
-                    gridData: FlGridData(show: true, drawVerticalLine: true),
-                    titlesData: FlTitlesData(
-                      leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 40,
-                        ),
+            const SizedBox(height: 20),
+            Container(
+              height: 200,
+              decoration: BoxDecoration(color: Colors.white),
+              child: LineChart(
+                LineChartData(
+                  lineTouchData: LineTouchData(
+                    enabled: true,
+                    touchTooltipData: LineTouchTooltipData(
+                      tooltipPadding: EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
                       ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 30,
-                          interval: 5,
-                          getTitlesWidget: (value, meta) {
-                            final index = value.toInt();
-                            if (index >= 0 &&
-                                index < sortedDates.length &&
-                                index % 5 == 0) {
-                              return Text(
-                                sortedDates[index]
-                                    .split('.')
-                                    .sublist(1)
-                                    .join('.'), // 简化显示：12.12
-                                style: const TextStyle(fontSize: 10),
-                              );
-                            }
-                            return const Text('');
-                          },
-                        ),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
+                      getTooltipColor: (touchedBarSpots) {
+                        return Colors.black54.withOpacity(0.9);
+                      },
+                      tooltipBorderRadius: BorderRadius.circular(8),
+                      getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                        return touchedBarSpots.map((spot) {
+                          final dateIndex = spot.x.toInt();
+                          final date = sortedDates[dateIndex];
+                          final dateStr = date.split('.').sublist(1).join('');
+                          String valueName;
+                          double value;
+                          switch (trendIndex) {
+                            case 0:
+                              valueName = '订单量';
+                              value = _analysisData
+                                  .firstWhere((d) => d.date == date)
+                                  .orderCount
+                                  .toDouble();
+                              break;
+                            case 1:
+                              valueName = '5分钟响应率';
+                              value = _analysisData
+                                  .firstWhere((d) => d.date == date)
+                                  .responseRate
+                                  .toDouble();
+                              break;
+                            case 2:
+                              valueName = '复购数';
+                              value = _analysisData
+                                  .firstWhere((d) => d.date == date)
+                                  .repeatCount
+                                  .toDouble();
+                              break;
+                            default:
+                              valueName = '数值';
+                              value = spot.y / 2;
+                          }
+                          return LineTooltipItem(
+                            '',
+                            textAlign: TextAlign.left,
+                            TextStyle(),
+                            children: [
+                              TextSpan(
+                                text: '$dateStr\n',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '●',
+                                style: TextStyle(
+                                  color: Color(0xFF3457ce), // 圆点颜色
+                                  fontSize: 20.sp, // 圆点大小
+                                ),
+                              ),
+                              TextSpan(
+                                text: '$valueName：${value.toStringAsFixed(1)}',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList();
+                      },
                     ),
-                    borderData: FlBorderData(
-                      show: true,
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    minX: 0,
-                    maxX: (sortedDates.length - 1).toDouble(),
-                    minY: 0,
-                    maxY: 200,
-                    // 适配订单数最大值
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: orderCountSpots,
-                        isCurved: true,
-                        color: Colors.blue,
-                        barWidth: 2,
-                        dotData: const FlDotData(show: true),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                      // 复购数折线
-                      LineChartBarData(
-                        spots: repeatCountSpots,
-                        isCurved: true,
-                        color: Colors.orange,
-                        barWidth: 2,
-                        dotData: const FlDotData(show: true),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                      // 解决率折线（缩放适配Y轴）
-                      LineChartBarData(
-                        spots: resolveRateSpots
-                            .map((e) => FlSpot(e.x, e.y * 2))
-                            .toList(),
-                        // 放大2倍便于显示
-                        isCurved: true,
-                        color: Colors.green,
-                        barWidth: 2,
-                        dotData: const FlDotData(show: true),
-                        belowBarData: BarAreaData(show: false),
-                      ),
-                    ],
+                    handleBuiltInTouches: true,
                   ),
+                  gridData: FlGridData(show: true, drawVerticalLine: false),
+                  titlesData: FlTitlesData(
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 20,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index < 0 || index >= sortedDates.length) {
+                            return SizedBox.shrink();
+                          }
+                          return Text(
+                            sortedDates[index].split('.').sublist(1).join(''),
+                            style: TextStyle(fontSize: 10.sp),
+                          );
+                        },
+                      ),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      left: BorderSide(color: Colors.grey[200]!), // 显示左边框
+                      bottom: BorderSide(color: Colors.grey[200]!), // 显示下边框
+                      top: BorderSide.none, // 隐藏上边框
+                      right: BorderSide.none, // 隐藏右边框
+                    ),
+                  ),
+                  minX: -1,
+                  maxX: (sortedDates.length).toDouble(),
+                  minY: 160,
+                  maxY: 200,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: resolveRateSpots
+                          .map((e) => FlSpot(e.x, e.y * 2))
+                          .toList(),
+                      isCurved: true,
+                      color: Color(0xFF3457ce),
+                      barWidth: 2,
+                      dotData: const FlDotData(show: true),
+                      belowBarData: BarAreaData(show: false),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -761,19 +823,19 @@ class _AnalysisState extends State<Analysis> {
   }
 
   Widget _buildAdvancedHorizontalList2() {
-    return Container(
-      height: 20,
+    return SizedBox(
+      height: 25,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
         physics: const ClampingScrollPhysics(),
         itemCount: filterTitles.length,
         itemBuilder: (context, index) {
-          bool isSelected = index == filterIndex;
+          bool isSelected = index == trendIndex;
           return _buildCustomButton(
             title: filterTitles[index],
             isSelected: isSelected,
-            onTap: () => setState(() => selectedIndex = index),
+            onTap: () => setState(() => trendIndex = index),
           );
         },
       ),
@@ -830,15 +892,16 @@ class HexagonPainter extends CustomPainter {
 
     for (int i = 0; i < layerCount; i++) {
       double radius = maxRadius * (i + 1) / layerCount;
-      Path path = _getHexagonPath(center, radius);
-      canvas.drawPath(path, paint);
+      Path hexagonPath = _getRotatedHexagonPath(center, radius);
+      canvas.drawPath(hexagonPath, paint);
+      _drawRadiantLines(canvas, center, radius, paint);
     }
   }
 
-  Path _getHexagonPath(Offset center, double radius) {
+  Path _getRotatedHexagonPath(Offset center, double radius) {
     Path path = Path();
     for (int i = 0; i < 6; i++) {
-      double angle = 60 * i * pi / 180;
+      double angle = ((60 * i) + 90) * pi / 180; // cons(Π/3) = 1 / 2
       double x = center.dx + radius * cos(angle);
       double y = center.dy + radius * sin(angle);
       if (i == 0) {
@@ -851,6 +914,36 @@ class HexagonPainter extends CustomPainter {
     return path;
   }
 
+  void _drawRadiantLines(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
+    for (int i = 0; i < 6; i++) {
+      double angle = ((60 * i) + 90) * pi / 180;
+      double x = center.dx + radius * cos(angle);
+      double y = center.dy + radius * sin(angle);
+      canvas.drawLine(center, Offset(x, y), paint);
+    }
+  }
+
+  // Path _getHexagonPath(Offset center, double radius) {
+  //   Path path = Path();
+  //   for (int i = 0; i < 6; i++) {
+  //     double angle = 60 * i * pi / 180;
+  //     double x = center.dx + radius * cos(angle);
+  //     double y = center.dy + radius * sin(angle);
+  //     if (i == 0) {
+  //       path.moveTo(x, y);
+  //     } else {
+  //       path.lineTo(x, y);
+  //     }
+  //   }
+  //   path.close();
+  //   return path;
+  // }
+
   @override
   bool shouldRepaint(covariant HexagonPainter oldDelegate) {
     return layerCount != oldDelegate.layerCount ||
@@ -860,7 +953,6 @@ class HexagonPainter extends CustomPainter {
 }
 
 class HexagonIndicatorWidget extends StatelessWidget {
-  // 6个指标配置：图标 + 文字
   final List<Map<String, dynamic>> indicators = [
     {'icon': Icons.text_fields_outlined, 'text': '内容质量'},
     {'icon': Icons.speed_outlined, 'text': '响应速度'},
@@ -869,80 +961,90 @@ class HexagonIndicatorWidget extends StatelessWidget {
     {'icon': Icons.miscellaneous_services_outlined, 'text': '服务表现'},
     {'icon': Icons.shopping_cart_outlined, 'text': '复购表现'},
   ];
-  final double size; // 六边形整体尺寸
+
+  final double size;
+
   HexagonIndicatorWidget({super.key, required this.size});
 
   @override
   Widget build(BuildContext context) {
-    final maxRadius = size / 2 - 20.w;
     final center = size / 2;
-
+    final maxRadius = size / 2;
     return SizedBox(
       width: size,
       height: size,
+      // decoration: BoxDecoration(
+      //   border: Border.all(width: 1, color: Colors.white),
+      // ),
       child: Stack(
+        clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
           CustomPaint(
-            size: Size(size, size),
+            size: Size(size * 0.6, size * 0.6),
             painter: HexagonPainter(
               layerCount: 6,
-              maxRadius: maxRadius,
+              maxRadius: size * 0.6 / 2,
               borderColor: Styles.hexagonBorderColor,
             ),
           ),
-          // 2. 绘制6个顶点的指标（图标+文字）
           ...List.generate(6, (index) {
-            double angle = 60 * index * pi / 180;
+            double angle = ((60 * index) + 90) * pi / 180;
             double x = center + maxRadius * cos(angle);
             double y = center + maxRadius * sin(angle);
-
-            // 调整文字和图标的位置（根据顶点方向）
             Alignment align = Alignment.center;
-            if (index == 0) align = Alignment.topCenter; // 上
-            if (index == 1) align = Alignment.topRight; // 右上
-            if (index == 2) align = Alignment.bottomRight; // 右下
-            if (index == 3) align = Alignment.bottomCenter; // 下
-            if (index == 4) align = Alignment.bottomLeft; // 左下
-            if (index == 5) align = Alignment.topLeft; // 左上
-
+            if (index == 0) y = y - 40;
+            if (index == 1) y = y - 30;
+            if (index == 2) align = Alignment.center; // 右下
+            if (index == 3) align = Alignment.center; // 下
+            if (index == 4) align = Alignment.center; // 下
+            if (index == 5) y = y - 30;
             return Positioned(
-              left: x - 40.w,
-              top: y - 20.h,
-              child: Align(
-                alignment: align,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              left: x - 35,
+              top: y,
+              child: Container(
+                width: 70,
+                height: 40,
+                // decoration: BoxDecoration(
+                //   border: Border.all(width: 1, color: Colors.white),
+                // ),
+                child: Column(
                   children: [
-                    // 指标图标
-                    Icon(
-                      indicators[index]['icon'],
-                      color: Styles.mainFontColor,
-                      size: 16.sp,
-                    ),
-                    SizedBox(width: 4.w),
-                    // 指标文字
                     Text(
-                      indicators[index]['text'],
-                      style: TextStyle(
-                        color: Styles.mainFontColor,
-                        fontSize: 12.sp,
-                        height: 1.2,
-                      ),
+                      "0",
+                      style: TextStyle(fontSize: 16.sp, color: Colors.white),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          indicators[index]['icon'],
+                          color: Colors.white,
+                          size: 12.sp,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          indicators[index]['text'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             );
           }),
-          Text(
-            '待评估',
-            style: TextStyle(
-              color: Styles.mainFontColor,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          // Text(
+          //   '待评估',
+          //   style: TextStyle(
+          //     color: Styles.mainFontColor,
+          //     fontSize: 18.sp,
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          // ),
         ],
       ),
     );
