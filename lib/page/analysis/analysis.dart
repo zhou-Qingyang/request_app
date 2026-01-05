@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:quest_app/provider/analysis_state.dart';
 
 import '../../helper/style.dart';
 import 'analysis_appbar.dart';
+
 
 class AnalysisData {
   final int orderCount;
@@ -424,26 +424,41 @@ class _AnalysisState extends State<Analysis> {
   Widget _buildFixedColumnTable(List<AnalysisData> analysisData) {
     const dateFormatPattern = 'yyyy.MM.dd';
     final dateFormat = DateFormat(dateFormatPattern);
+    if(trendIndex == 0) { //如果是近7天数据
+      analysisData = analysisData.sublist(0, 7);
+    }
     final sortedDates = analysisData.map((AnalysisData i) => i.date).toList()
       ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
+    const double headerHeight = 20.0; // 标题高度
+    const double rowHeight = 20.0; // 每行数据高度
+    const double paddingHeight = 20.0; // 上下内边距
+    const double titleHeight = 30.0; // "明细数据"标题高度
+    final double tableHeight = titleHeight +
+        headerHeight +
+        (sortedDates.length * rowHeight) +
+        paddingHeight + 10;
+    final double finalHeight = tableHeight.clamp(200.0, 600.0);
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 10.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
-        height: 200,
+        height: finalHeight,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color:  Colors.white,
           borderRadius: BorderRadius.circular(12.r),
         ),
         padding: EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "明细数据",
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+            SizedBox(
+              height: 30,
+              child: Text(
+                "明细数据",
+                style:  TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ),
             const SizedBox(height: 4),
@@ -465,10 +480,11 @@ class _AnalysisState extends State<Analysis> {
                       itemCount: sortedDates.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return _buildTableHeaderCell(_tableHeaders[0]);
+                          return _buildTableHeaderCell(_tableHeaders[0],titleHeight);
                         }
                         return _buildTableDataCell(
                           sortedDates[index - 1],
+                          rowHeight,
                           isFixed: true,
                         );
                       },
@@ -483,59 +499,65 @@ class _AnalysisState extends State<Analysis> {
                         child: ListView.builder(
                           padding: EdgeInsets.zero,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: sortedDates.length + 1,
-                          itemBuilder: (context, index) {
+                          itemCount:  sortedDates.length + 1,
+                          itemBuilder:  (context, index) {
                             if (index == 0) {
                               return Row(
                                 children: _tableHeaders
                                     .sublist(1)
                                     .map(
                                       (header) => Expanded(
-                                        child: _buildTableHeaderCell(header),
-                                      ),
-                                    )
-                                    .toList(),
+                                    child: _buildTableHeaderCell(header,titleHeight),
+                                  ),
+                                ).toList(),
                               );
                             }
                             final date = sortedDates[index - 1];
                             final data = analysisData.firstWhere(
-                              (i) => i.date == date,
+                                  (i) => i.date == date,
                             );
                             return Row(
                               children: [
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.orderCount.toString(),
+                                    rowHeight
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.responseRate.toString(),
+                                      rowHeight
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.positiveRate.toString(),
+                                      rowHeight
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.negativeRate.toString(),
+                                      rowHeight
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.repeatCount.toString(),
+                                      rowHeight
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.noLimitOrderCount.toString(),
+                                      rowHeight
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.resolveRate.toString(),
+                                      rowHeight
                                   ),
                                 ),
                               ],
@@ -555,9 +577,9 @@ class _AnalysisState extends State<Analysis> {
   }
 
   // 表格头单元格
-  Widget _buildTableHeaderCell(String text) {
+  Widget _buildTableHeaderCell(String text,double height) {
     return Container(
-      height: 20,
+      height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.grey[100],
@@ -572,9 +594,9 @@ class _AnalysisState extends State<Analysis> {
   }
 
   // 表格数据单元格
-  Widget _buildTableDataCell(String text, {bool isFixed = false}) {
+  Widget _buildTableDataCell(String text,double height, {bool isFixed = false}) {
     return Container(
-      height: 20,
+      height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
@@ -639,7 +661,6 @@ class _AnalysisState extends State<Analysis> {
       }
       return FlSpot(index.toDouble(), valueGetter(data));
     }).toList();
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
@@ -840,7 +861,7 @@ class _AnalysisState extends State<Analysis> {
                       spots: resolveRateSpots
                           .map((e) => FlSpot(e.x, e.y))
                           .toList(),
-                      isCurved: true,
+                      isCurved: false,
                       color: Color(0xFF3457ce),
                       barWidth: 2,
                       dotData: const FlDotData(show: true),
@@ -1007,9 +1028,6 @@ class HexagonIndicatorWidget extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      // decoration: BoxDecoration(
-      //   border: Border.all(width: 1, color: Colors.white),
-      // ),
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
