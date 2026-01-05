@@ -15,48 +15,56 @@ class HomeBottomBar extends StatefulWidget {
 
 class _HomeBottomBarState extends State<HomeBottomBar>
     with SingleTickerProviderStateMixin {
-  final titles = ["消息", "通信录", "", "发现", "我的"]; // 中间留空
-  final List<IconData> icons = [
-    CupertinoIcons.chat_bubble,
-    CupertinoIcons. person_2,
-    CupertinoIcons.plus,
-    CupertinoIcons.timer,
-    CupertinoIcons.person,
+  final titles = ["咨询广场", "咨询抢单", "", "答主中心", "个人中心"];
+  final List<String> icons = [
+    "assets/bar/bar1.png",
+    "assets/bar/bar2.png",
+    "assets/bar/bar-center.png",
+    "assets/bar/bar3.png",
+    "assets/bar/bar4.png",
   ];
-  final List<IconData> activeIcons = [
-    CupertinoIcons.chat_bubble_fill,
-    CupertinoIcons.person_2_fill,
-    CupertinoIcons.plus_circle_fill,
-    CupertinoIcons.timer_fill,
-    CupertinoIcons.person_fill,
+
+  final List<String> activeIcons = [
+    "assets/bar/bar1.png",
+    "assets/bar/bar2-1.png",
+    "assets/bar/bar-center.png",
+    "assets/bar/bar3-1.png",
+    "assets/bar/bar4.png",
   ];
 
   Widget _getBarIcon(int index, bool isActive) {
-    // 中间按钮特殊处理
     if (index == 2) {
-      return SizedBox. shrink();
+      return SizedBox.shrink();
     }
     return SizedBox(
-      width:  24.h,
+      width: 24.h,
       height: 24.h,
-      child: Icon(
-        isActive ? activeIcons[index] :  icons[index],
-        size:  24.sp,
-        color: isActive ? Styles.bottomBarSelected : Styles.bottomBarUnSelected,
+      child: Image.asset(
+        isActive ? activeIcons[index] : icons[index],
+        width: 24.w,
+        height: 24.w,
+        fit: BoxFit.cover,
       ),
     );
   }
 
   Widget _getBarText(int index, bool isActive) {
-    // 中间按钮不显示文字
     if (index == 2) {
       return SizedBox.shrink();
     }
+    if (index == 1) {
+      if (isActive) {
+        titles[index] = "刷新";
+      } else {
+        titles[index] = "咨询抢单";
+      }
+    }
+
     return Text(
       titles[index],
       style: TextStyle(
         fontSize: 14.sp,
-        color: isActive ? Styles.bottomBarSelected : Styles. bottomBarUnSelected,
+        color: isActive ? Styles.bottomBarSelected : Styles.bottomBarUnSelected,
         height: 1.2,
       ),
       maxLines: 1,
@@ -77,29 +85,29 @@ class _HomeBottomBarState extends State<HomeBottomBar>
           height: 60.h + bottomHeight,
           padding: EdgeInsets.only(bottom: bottomHeight),
           decoration: BoxDecoration(
-            color: Colors. white,
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color:  Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(0.05),
                 offset: Offset(0, -2),
                 blurRadius: 8,
               ),
             ],
           ),
           child: BottomBar(
-            currentIndex:  currentIndex,
+            currentIndex: currentIndex,
             unFocusColor: Styles.bottomBarUnSelected,
             focusColor: Styles.bottomBarSelected,
             onTap: (index) {
               context.read<RouterState>().changeIndex(index);
             },
-            items:  List<BottomBarItem>. generate(
-              5, // 改为5个
-                  (index) => BottomBarItem(
+            items: List<BottomBarItem>.generate(
+              5,
+              (index) => BottomBarItem(
                 icon: _getBarIcon(index, false),
                 activeIcon: _getBarIcon(index, true),
                 title: _getBarText(index, false),
-                activeTitle:  _getBarText(index, true),
+                activeTitle: _getBarText(index, true),
                 isCenter: index == 2, // 标记中间按钮
               ),
             ),
@@ -107,38 +115,22 @@ class _HomeBottomBarState extends State<HomeBottomBar>
         ),
         // 中间凸起的圆形按钮
         Positioned(
-          bottom: bottomHeight + 5.h, // 超出底部导航栏
+          bottom: bottomHeight + 5.h,
           child: GestureDetector(
             onTap: () {
               context.read<RouterState>().changeIndex(2);
             },
-            child: Container(
+            child: SizedBox(
               width: 56.w,
               height: 56.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF3457ce),
-                    Color(0xFF5B7FE8),
-                  ],
-                  begin: Alignment.topLeft,
-                  end:  Alignment.bottomRight,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12.r),
+                child: Image.asset(
+                  icons[2],
+                  width: 24.w,
+                  height: 24.w,
+                  fit: BoxFit.cover,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFF3457ce).withOpacity(0.3),
-                    offset: Offset(0, 4),
-                    blurRadius:  12,
-                  ),
-                ],
-              ),
-              child: Icon(
-                currentIndex == 2
-                    ? CupertinoIcons. plus_circle_fill
-                    : CupertinoIcons.plus,
-                color: Colors.white,
-                size: 28.sp,
               ),
             ),
           ),
@@ -174,11 +166,7 @@ class _BottomBarState extends State<BottomBar> {
     final bool selected = i == widget.currentIndex;
     // 中间按钮占位符（透明不可见）
     if (item.isCenter) {
-      return Expanded(
-        child: SizedBox(
-          height: 60.h,
-        ),
-      );
+      return Expanded(child: SizedBox(height: 60.h));
     }
 
     return Expanded(
@@ -187,18 +175,16 @@ class _BottomBarState extends State<BottomBar> {
         child: InkWell(
           onTap: () => widget.onTap(i),
           splashColor: Colors.transparent,
-          highlightColor: Colors. transparent,
+          highlightColor: Colors.transparent,
           child: Container(
-            constraints: BoxConstraints(
-              minHeight: 60.h,
-            ),
+            constraints: BoxConstraints(minHeight: 60.h),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                selected ? item. activeIcon : item.icon,
+                selected ? item.activeIcon : item.icon,
                 SizedBox(height: 2.h),
-                selected ?  item.activeTitle : item.title,
+                selected ? item.activeTitle : item.title,
               ],
             ),
           ),
@@ -217,7 +203,7 @@ class _BottomBarState extends State<BottomBar> {
             maxHeight: 60.h + MediaQuery.of(context).padding.bottom,
           ),
           child: Row(
-            mainAxisAlignment:  MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: List.generate(widget.items.length, _createItem),
           ),

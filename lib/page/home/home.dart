@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     CenterPage(),
                     AcceptPage(),
+                    IndexPage(),
                     CenterPage(),
                     IndexPage(),
                   ],
@@ -82,3 +83,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+
+

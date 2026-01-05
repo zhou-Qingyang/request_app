@@ -83,37 +83,34 @@ class _CenterPageState extends State<CenterPage> {
     ];
 
     iconData = [
-      IconDataCenterInfo("assets/images/gpt.png", "情感星球", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "数据分析", () {
+      IconDataCenterInfo("assets/icons/1.png", "情感星球", () {}),
+      IconDataCenterInfo("assets/icons/2.png", "数据分析", () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Analysis()),
         );
       }),
-      IconDataCenterInfo("assets/images/gpt.png", "咨询抢单", () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => AcceptPage()),
-        // );
+      IconDataCenterInfo("assets/icons/3.png", "咨询抢单", () {
         context.read<RouterState>().changeIndex(1);
       }),
-      IconDataCenterInfo("assets/images/gpt.png", "订单管理", () {
+      IconDataCenterInfo("assets/icons/4.png", "订单管理", () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => OrderPage()),
         );
       }),
-      IconDataCenterInfo("assets/images/gpt.png", "成长中心", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "问币商城", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "我的周报", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "答主学院", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "我的主页", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "应用中心", () {}),
+      IconDataCenterInfo("assets/icons/5.png", "成长中心", () {}),
+      IconDataCenterInfo("assets/icons/6.png", "问币商城", () {}),
+      IconDataCenterInfo("assets/icons/7.png", "我的周报", () {}),
+      IconDataCenterInfo("assets/icons/8.png", "答主学院", () {}),
+      IconDataCenterInfo("assets/icons/9.png", "我的主页", () {}),
+      IconDataCenterInfo("assets/icons/10.png", "应用中心", () {}),
 
-      IconDataCenterInfo("assets/images/gpt.png", "我的周报", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "答主学院", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "我的主页", () {}),
-      IconDataCenterInfo("assets/images/gpt.png", "应用中心", () {}),
+      IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
+      IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
+      IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
+      IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
+      IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
     ];
   }
 
@@ -209,7 +206,7 @@ class _CenterPageState extends State<CenterPage> {
             child: Column(
               children: [
                 Container(
-                  padding: EdgeInsets.only(top: 10, left: 20, right: 20),
+                  padding: EdgeInsets.only( left: 6, right: 6),
                   height: 160,
                   child: PageView.builder(
                     controller: _pageController,
@@ -239,7 +236,7 @@ class _CenterPageState extends State<CenterPage> {
     final endIndex = (startIndex + itemsPerPage).clamp(0, iconData.length);
     final pageItems = iconData.sublist(startIndex, endIndex);
     return GridView.builder(
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.only(top: 10),
       physics: NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 5,
@@ -249,7 +246,7 @@ class _CenterPageState extends State<CenterPage> {
       ),
       itemCount: pageItems.length,
       itemBuilder: (context, index) {
-        return _buildIconItem(pageItems[index]);
+        return _buildIconItem(pageItems[index], index);
       },
     );
   }
@@ -427,30 +424,54 @@ class _CenterPageState extends State<CenterPage> {
     );
   }
 
-  Widget _buildIconItem(IconDataCenterInfo item) {
+  Widget _buildIconItem(IconDataCenterInfo item, int index) {
     return GestureDetector(
       onTap: item.onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: Styles.themeStartColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.r),
-              child: Image.asset(
-                item.iconPath,
-                width: 24.w,
-                height: 24.w,
-                fit: BoxFit.cover,
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: Styles.themeStartColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: Image.asset(
+                    item.iconPath,
+                    width: 24.w,
+                    height: 24.w,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-            ),
+              if (index == 4 || index == 6)
+                Positioned(
+                  top: -3,
+                  left: 24.w,
+                  child: Container(
+                    height: 10,
+                    width: 24,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFfd284a),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "NEW",
+                        style: TextStyle(fontSize: 8.sp, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           Text(
             item.title,
             style: TextStyle(fontSize: 12.sp, color: Colors.black87),
@@ -683,21 +704,12 @@ class _CenterPageState extends State<CenterPage> {
             const SizedBox(height: 10),
             Column(
               children: [
-                _buildClassItem(
-                  "https://picsum.photos/1920/1080",
-                  "如何获得 答主标签,得到平台的认可？",
-                ),
+                _buildClassItem("assets/icons/11.png", "如何获得 答主标签,得到平台的认可？"),
                 _buildClassDivider(),
-                _buildClassItem(
-                  "https://picsum.photos/1920/1080",
-                  "如何获得 答主标签,得到平台的认可？",
-                ),
+                _buildClassItem("assets/icons/12.png", "如何获得 答主标签,得到平台的认可？"),
                 _buildClassDivider(),
-                _buildClassItem(
-                  "https://picsum.photos/1920/1080",
-                  "如何获得 答主标签,得到平台的认可？",
-                ),
-                const SizedBox(height: 10)
+                _buildClassItem("assets/icons/13.png", "如何获得 答主标签,得到平台的认可？"),
+                const SizedBox(height: 10),
               ],
             ),
           ],
@@ -715,13 +727,12 @@ class _CenterPageState extends State<CenterPage> {
     );
   }
 
-
   Widget _buildClassItem(String imgUrl, String title) {
     return Row(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12.r),
-          child: Image.network(
+          child: Image.asset(
             imgUrl,
             width: 120.w,
             height: 80.w,
@@ -746,10 +757,7 @@ class _CenterPageState extends State<CenterPage> {
                 children: [
                   Text(
                     "19.0万阅读",
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey[600]!,
-                    ),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]!),
                   ),
                   TextButton(
                     onPressed: () {
