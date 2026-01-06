@@ -79,7 +79,7 @@ class _DataManagementPageState extends State<DataManagementPage> {
           _buildSectionTitle('服务数据管理'),
           _buildServiceDataCard(),
           SizedBox(height: 20.h),
-          _buildSectionTitle('报价订单限制'),
+          _buildSectionTitle('抢单量上限'),
           _buildQuoteOrderLimitCard(),
           SizedBox(height: 20.h),
           _buildSectionTitle('六边形数据管理'),
@@ -283,7 +283,7 @@ class _DataManagementPageState extends State<DataManagementPage> {
       ),
       child: ListTile(
         title: Text(
-          '报价订单限制',
+          '抢单量上限',
           style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
         subtitle: Text(
@@ -306,20 +306,20 @@ class _DataManagementPageState extends State<DataManagementPage> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         title: Text(
-          '编辑报价订单限制',
+          '编辑抢单量上限',
           style: TextStyle(fontSize: 16.sp, color: Colors.black87),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('订单限制数量'),
+            const Text('抢单量上限'),
             SizedBox(height: 8.h),
             TextField(
               controller: limitCtrl,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                hintText: '请输入订单限制数量',
+                hintText: '请输入抢单量上限',
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 12,
@@ -339,16 +339,14 @@ class _DataManagementPageState extends State<DataManagementPage> {
           TextButton(
             onPressed: () {
               if (limitCtrl.text.isEmpty) {
-                _showSnackBar('订单限制不能为空');
+                _showSnackBar('抢单量上限不能为空');
                 return;
               }
-
               final limit = int.tryParse(limitCtrl.text);
               if (limit == null || limit < 0) {
                 _showSnackBar('请输入有效的数字（≥0）');
                 return;
               }
-
               setState(() {
                 _quoteOrderLimit = limit;
               });
