@@ -1102,6 +1102,7 @@ class HexagonIndicatorWidget extends StatelessWidget {
     {'icon': Icons.miscellaneous_services_outlined, 'text': '服务表现'},
     {'icon': Icons.shopping_cart_outlined, 'text': '复购表现'},
   ];
+\
 
   final Map<int, String> indicaTitles = {
     0: "用户反馈",
