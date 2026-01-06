@@ -39,6 +39,7 @@ class _WithDrawPageState extends State<WithDrawPage> {
     final List<WithDrawInfo> withDraws = context.select(
       (OrderState r) => r.withDraws,
     );
+    final String totalAmount = context.select((OrderState r) => r.formattedTotalAmount);
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: getSystemUiOverlayStyle(false),
       child: Scaffold(
@@ -226,7 +227,7 @@ class _WithDrawPageState extends State<WithDrawPage> {
                               ],
                             ),
                             Text(
-                              "累积获得（元）88.23",
+                              "累积获得（元）$totalAmount",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14.sp,

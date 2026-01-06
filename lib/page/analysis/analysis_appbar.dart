@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quest_app/page/analysis/service_edit.dart';
 import '../widgets/svg_button.dart';
 import 'analysis_edit.dart';
 
@@ -61,7 +62,12 @@ class AnalysisAppbar extends StatelessWidget implements PreferredSizeWidget {
                         _buildDivider(),
                         SvgIconButton(
                           assetName: 'assets/svg/close.svg',
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => DataManagementPage()),
+                            );
+                          },
                           color: Colors.black87,
                           iconSize: 14.sp,
                         ),

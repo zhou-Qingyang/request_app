@@ -23,14 +23,27 @@ class OrderState extends ChangeNotifier {
   List<OrderInfo> _orders = [];
   List<WithDrawInfo> _withDraws = [];
 
-  // List<WithDrawInfo> get withDraws => _withDraws;
+  double get totalAmount {
+    if (_withDraws.isEmpty) return 0.0;
+    return _withDraws.fold(0.0, (sum, item) {
+      try {
+        return sum + double. parse(item.amount);
+      } catch (e) {
+        return sum;
+      }
+    });
+  }
 
-   List<WithDrawInfo> get withDraws {
+  String get formattedTotalAmount {
+    return totalAmount.toStringAsFixed(2);
+  }
+
+  List<WithDrawInfo> get withDraws {
     final sorted = List<WithDrawInfo>.from(_withDraws);
     sorted.sort((a, b) {
       try {
         final dateA = DateTime.parse(a.date.replaceAll(' ', 'T'));
-        final dateB = DateTime.parse(b. date.replaceAll(' ', 'T'));
+        final dateB = DateTime.parse(b.date.replaceAll(' ', 'T'));
         return dateB.compareTo(dateA);
       } catch (e) {
         return b.date.compareTo(a.date);
@@ -130,7 +143,6 @@ class OrderState extends ChangeNotifier {
     _orders = newOrders;
     notifyListeners();
   }
-
 
   void addWithDraw(WithDrawInfo withDraw) {
     final int newWithDrawId = _withDraws.first.id + 1;

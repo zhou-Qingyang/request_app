@@ -12,7 +12,6 @@ import 'package:quest_app/provider/analysis_state.dart';
 import '../../helper/style.dart';
 import 'analysis_appbar.dart';
 
-
 class AnalysisData {
   final int orderCount;
   final int responseRate;
@@ -23,16 +22,14 @@ class AnalysisData {
   final int resolveRate;
   final String date;
 
-  AnalysisData(
-    this.orderCount,
-    this.responseRate,
-    this.positiveRate,
-    this.negativeRate,
-    this.repeatCount,
-    this.noLimitOrderCount,
-    this.resolveRate,
-    this.date,
-  );
+  AnalysisData(this.orderCount,
+      this.responseRate,
+      this.positiveRate,
+      this.negativeRate,
+      this.repeatCount,
+      this.noLimitOrderCount,
+      this.resolveRate,
+      this.date,);
 
   AnalysisData copyWith({
     int? orderCount,
@@ -104,10 +101,10 @@ class _AnalysisState extends State<Analysis> {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingHeight = MediaQuery.of(context).padding.top + 44.h;
-    final List<AnalysisData> analysisData = context.select(
-      (AnalysisState r) => r.analyses,
-    );
+    final double paddingHeight = MediaQuery
+        .of(context)
+        .padding
+        .top + 44.h;
     return Scaffold(
       backgroundColor: Styles.mainBackground,
       extendBodyBehindAppBar: true,
@@ -126,7 +123,7 @@ class _AnalysisState extends State<Analysis> {
         child: Column(
           children: [
             _buildAdvancedHorizontalList(),
-            _buildPageView(analysisData),
+            _buildPageView(context),
           ],
         ),
       ),
@@ -190,7 +187,19 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildPageView(List<AnalysisData> data) {
+  Widget _buildPageView(BuildContext context) {
+    final List<AnalysisData> analysisData = context.select(
+          (AnalysisState r) => r.analyses,
+    );
+    final List<ServiceDataInfo> serviceData = context.select(
+          (AnalysisState r) => r.serviceData,
+    );
+    final int quoteOrderLimit = context.select(
+          (AnalysisState r) => r.quoteOrderLimit,
+    );
+    final Map<String, int> hexagonData = context.select(
+          (AnalysisState r) => r.hexagonData,
+    );
     return Expanded(
       child: PageView.builder(
         controller: _pageController,
@@ -203,7 +212,8 @@ class _AnalysisState extends State<Analysis> {
         itemCount: tabTitles.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            return _buildFirstPage(data);
+            return _buildFirstPage(
+                analysisData, serviceData, quoteOrderLimit, hexagonData);
           }
           return Container(
             alignment: Alignment.center,
@@ -217,7 +227,9 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildFirstPage(List<AnalysisData> analysisData) {
+  Widget _buildFirstPage(List<AnalysisData> analysisData,
+      List<ServiceDataInfo> serviceData, int quoteOrderLimit,
+      Map<String, int> hexagonData) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -241,8 +253,8 @@ class _AnalysisState extends State<Analysis> {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: Align(
-                    child: HexagonIndicatorWidget(size: 200),
                     alignment: Alignment.topCenter,
+                    child: HexagonIndicatorWidget(size: 200, hexagonMap:hexagonData),
                   ),
                 ),
               ),
@@ -250,12 +262,12 @@ class _AnalysisState extends State<Analysis> {
                 top: 260,
                 left: 10.w,
                 right: 10.w,
-                child: _buildAnalysisService(),
+                child: _buildAnalysisService(quoteOrderLimit),
               ),
             ],
           ),
           const SizedBox(height: 70),
-          _buildServiceData(),
+          _buildServiceData(serviceData),
           const SizedBox(height: 10),
           _buildLineChart(analysisData),
           const SizedBox(height: 10),
@@ -266,7 +278,7 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildAnalysisService() {
+  Widget _buildAnalysisService(int quoteOrderLimit) {
     return Container(
       height: 100,
       padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
@@ -343,7 +355,7 @@ class _AnalysisState extends State<Analysis> {
                 ),
                 const Spacer(),
                 Text(
-                  "40题",
+                  "$quoteOrderLimit题",
                   style: TextStyle(fontSize: 12.sp, color: Styles.bluFontColor),
                 ),
                 Icon(Icons.expand_more, color: Styles.bellColor, size: 14.sp),
@@ -355,11 +367,11 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildServiceData() {
+  Widget _buildServiceData(List<ServiceDataInfo> serviceData) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
-        height: 120,
+        height: 200,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
@@ -399,9 +411,58 @@ class _AnalysisState extends State<Analysis> {
                 }),
               ],
             ),
+            const SizedBox(height: 10,),
+            Expanded(
+              child: GridView.builder(
+                padding: EdgeInsets.only(top: 0),
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 2,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 1.3,
+                ),
+                itemCount: 6,
+                itemBuilder: (context, index) {
+                  return _buildServiceDataItem(serviceData[index]);
+                },
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+
+  Widget _buildServiceDataItem(ServiceDataInfo serviceData) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          serviceData.title,
+          style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+        ),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: serviceData.data.toString(),
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  height: 1.4,
+                  fontWeight: FontWeight.bold,
+                  color: Styles.mainFontColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          "昨日：${serviceData.lateDayData}",
+          style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+        ),
+      ],
     );
   }
 
@@ -424,7 +485,8 @@ class _AnalysisState extends State<Analysis> {
   Widget _buildFixedColumnTable(List<AnalysisData> analysisData) {
     const dateFormatPattern = 'yyyy.MM.dd';
     final dateFormat = DateFormat(dateFormatPattern);
-    if(trendIndex == 0) { //如果是近7天数据
+    if (trendIndex == 0) {
+      //如果是近7天数据
       analysisData = analysisData.sublist(0, 7);
     }
     final sortedDates = analysisData.map((AnalysisData i) => i.date).toList()
@@ -433,17 +495,19 @@ class _AnalysisState extends State<Analysis> {
     const double rowHeight = 20.0; // 每行数据高度
     const double paddingHeight = 20.0; // 上下内边距
     const double titleHeight = 30.0; // "明细数据"标题高度
-    final double tableHeight = titleHeight +
-        headerHeight +
-        (sortedDates.length * rowHeight) +
-        paddingHeight + 10;
+    final double tableHeight =
+        titleHeight +
+            headerHeight +
+            (sortedDates.length * rowHeight) +
+            paddingHeight +
+            10;
     final double finalHeight = tableHeight.clamp(200.0, 600.0);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
         height: finalHeight,
         decoration: BoxDecoration(
-          color:  Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
         ),
         padding: EdgeInsets.all(10),
@@ -454,7 +518,7 @@ class _AnalysisState extends State<Analysis> {
               height: 30,
               child: Text(
                 "明细数据",
-                style:  TextStyle(
+                style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -480,7 +544,10 @@ class _AnalysisState extends State<Analysis> {
                       itemCount: sortedDates.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return _buildTableHeaderCell(_tableHeaders[0],titleHeight);
+                          return _buildTableHeaderCell(
+                            _tableHeaders[0],
+                            titleHeight,
+                          );
                         }
                         return _buildTableDataCell(
                           sortedDates[index - 1],
@@ -499,17 +566,22 @@ class _AnalysisState extends State<Analysis> {
                         child: ListView.builder(
                           padding: EdgeInsets.zero,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount:  sortedDates.length + 1,
-                          itemBuilder:  (context, index) {
+                          itemCount: sortedDates.length + 1,
+                          itemBuilder: (context, index) {
                             if (index == 0) {
                               return Row(
                                 children: _tableHeaders
                                     .sublist(1)
                                     .map(
-                                      (header) => Expanded(
-                                    child: _buildTableHeaderCell(header,titleHeight),
-                                  ),
-                                ).toList(),
+                                      (header) =>
+                                      Expanded(
+                                        child: _buildTableHeaderCell(
+                                          header,
+                                          titleHeight,
+                                        ),
+                                      ),
+                                )
+                                    .toList(),
                               );
                             }
                             final date = sortedDates[index - 1];
@@ -521,43 +593,43 @@ class _AnalysisState extends State<Analysis> {
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.orderCount.toString(),
-                                    rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.responseRate.toString(),
-                                      rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.positiveRate.toString(),
-                                      rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.negativeRate.toString(),
-                                      rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.repeatCount.toString(),
-                                      rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.noLimitOrderCount.toString(),
-                                      rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
                                     data.resolveRate.toString(),
-                                      rowHeight
+                                    rowHeight,
                                   ),
                                 ),
                               ],
@@ -577,7 +649,7 @@ class _AnalysisState extends State<Analysis> {
   }
 
   // 表格头单元格
-  Widget _buildTableHeaderCell(String text,double height) {
+  Widget _buildTableHeaderCell(String text, double height) {
     return Container(
       height: height,
       alignment: Alignment.center,
@@ -594,7 +666,10 @@ class _AnalysisState extends State<Analysis> {
   }
 
   // 表格数据单元格
-  Widget _buildTableDataCell(String text,double height, {bool isFixed = false}) {
+  Widget _buildTableDataCell(String text,
+      double height, {
+        bool isFixed = false,
+      }) {
     return Container(
       height: height,
       alignment: Alignment.center,
@@ -619,9 +694,8 @@ class _AnalysisState extends State<Analysis> {
   };
 
   (double minValue, double maxValue) getMinMaxByTrendIndex(
-    List<AnalysisData> analysisData,
-    int trendIndex,
-  ) {
+      List<AnalysisData> analysisData,
+      int trendIndex,) {
     // 空数据兜底
     if (analysisData.isEmpty) {
       return (0.0, 0.0);
@@ -646,13 +720,17 @@ class _AnalysisState extends State<Analysis> {
       ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
     final sortedData = List<AnalysisData>.from(analysisData)
       ..sort(
-        (a, b) => dateFormat.parse(a.date).compareTo(dateFormat.parse(b.date)),
+            (a, b) =>
+            dateFormat.parse(a.date).compareTo(dateFormat.parse(b.date)),
       );
     final (minValue, maxValue) = getMinMaxByTrendIndex(
       analysisData,
       filterIndex,
     );
-    final resolveRateSpots = sortedData.asMap().entries.map((entry) {
+    final resolveRateSpots = sortedData
+        .asMap()
+        .entries
+        .map((entry) {
       final index = entry.key;
       final data = entry.value;
       final valueGetter = trendValueGetter[filterIndex];
@@ -863,8 +941,18 @@ class _AnalysisState extends State<Analysis> {
                           .toList(),
                       isCurved: false,
                       color: Color(0xFF3457ce),
-                      barWidth: 2,
-                      dotData: const FlDotData(show: true),
+                      barWidth: 1,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) {
+                          return FlDotCirclePainter(
+                            radius: 2,
+                            color: Color(0xFF3457ce),
+                            strokeWidth: 1,
+                            strokeColor: Colors.white,
+                          );
+                        },
+                      ),
                       belowBarData: BarAreaData(show: false),
                     ),
                   ],
@@ -969,12 +1057,10 @@ class HexagonPainter extends CustomPainter {
     return path;
   }
 
-  void _drawRadiantLines(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    Paint paint,
-  ) {
+  void _drawRadiantLines(Canvas canvas,
+      Offset center,
+      double radius,
+      Paint paint,) {
     for (int i = 0; i < 6; i++) {
       double angle = ((60 * i) + 90) * pi / 180;
       double x = center.dx + radius * cos(angle);
@@ -1017,9 +1103,20 @@ class HexagonIndicatorWidget extends StatelessWidget {
     {'icon': Icons.shopping_cart_outlined, 'text': '复购表现'},
   ];
 
-  final double size;
+  final Map<int, String> indicaTitles = {
+    0: "用户反馈",
+    1: "服务表现",
+    2: "复购表现",
+    3: "内容质量",
+    4: "响应速度",
+    5: "原创表现",
+  };
 
-  HexagonIndicatorWidget({super.key, required this.size});
+  final double size;
+  final Map<String, int> hexagonMap;
+
+  HexagonIndicatorWidget(
+      {super.key, required this.size, required this.hexagonMap});
 
   @override
   Widget build(BuildContext context) {
@@ -1063,7 +1160,7 @@ class HexagonIndicatorWidget extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      "0",
+                      hexagonMap[indicaTitles[index]!].toString(),
                       style: TextStyle(fontSize: 16.sp, color: Colors.white),
                     ),
                     Row(
@@ -1076,7 +1173,7 @@ class HexagonIndicatorWidget extends StatelessWidget {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          indicators[index]['text'],
+                          indicaTitles[index]!,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 12.sp,

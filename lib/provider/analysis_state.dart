@@ -3,10 +3,38 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:quest_app/page/analysis/analysis.dart';
 
-class AnalysisState extends ChangeNotifier {
-  List<AnalysisData> _analyses = [];
+class ServiceDataInfo {
+  int id;
+  String title;
+  int data;
+  int lateDayData;
+  ServiceDataInfo(this.id, this.title, this.data,this.lateDayData);
+  ServiceDataInfo copyWith({int? id, String? title, int? data, int? lateDayData}) {
+    return ServiceDataInfo(
+      id ?? this.id,
+      title ?? this.title,
+      data ?? this.data,
+      lateDayData ?? this.lateDayData
+    );
+  }
+}
 
+class AnalysisState extends ChangeNotifier {
+  List<ServiceDataInfo> _serviceData = [];
+  List<ServiceDataInfo> get serviceData => _serviceData;
+  Map<String, int> _hexagonData = {
+    '用户反馈': 85,
+    '服务表现': 92,
+    '复购表现': 78,
+    '内容质量': 95,
+    '响应速度': 88,
+    '原创表现': 73,
+  };
+  int _quoteOrderLimit = 0;
+  int get quoteOrderLimit => _quoteOrderLimit;
+  List<AnalysisData> _analyses = [];
   List<AnalysisData> get analyses => _analyses;
+  Map<String, int> get hexagonData => _hexagonData;
 
   List<AnalysisData> _generate30DaysData() {
     final List<AnalysisData> data = [];
@@ -46,6 +74,14 @@ class AnalysisState extends ChangeNotifier {
   AnalysisState() {
     _analyses = _generate30DaysData();
     _analyses.sort((a, b) => b.date.compareTo(a.date));
+    _serviceData = [
+      ServiceDataInfo(1, "订单量", 1250, 980),
+      ServiceDataInfo(2, "5分钟响应率", 3456, 3102),
+      ServiceDataInfo(3, "好评数", 8920, 7543),
+      ServiceDataInfo(4, "差评数", 2178, 2045),
+      ServiceDataInfo(5, "复购数", 567, 489),
+      ServiceDataInfo(6, "不限时奖励单", 4321, 4156),
+    ];
   }
 
   void updateAnalysis(AnalysisData data) {
@@ -58,8 +94,6 @@ class AnalysisState extends ChangeNotifier {
     _analyses = newList;
     notifyListeners();
   }
-
-
 
 
 }
