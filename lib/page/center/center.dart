@@ -8,6 +8,7 @@ import 'package:quest_app/page/accept/accept.dart';
 import 'package:quest_app/page/analysis/analysis.dart';
 import 'package:quest_app/page/order/order.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
+import 'package:quest_app/page/withDraw/with_draw.dart';
 import 'package:quest_app/provider/route_state.dart';
 
 import '../../helper/style.dart';
@@ -45,10 +46,9 @@ class _CenterPageState extends State<CenterPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final List<String> images = [
-    "https://picsum.photos/1920/1080",
-    "https://picsum.photos/1920/1080",
-    "https://picsum.photos/1920/1080",
-    "https://picsum.photos/1920/1080",
+    "assets/images/b1.png",
+    "assets/images/b2.png",
+    "assets/images/b1.png",
   ];
 
   late PageController _bannerPageController = PageController();
@@ -83,7 +83,12 @@ class _CenterPageState extends State<CenterPage> {
     ];
 
     iconData = [
-      IconDataCenterInfo("assets/icons/1.png", "情感星球", () {}),
+      IconDataCenterInfo("assets/icons/1.png", "情感星球", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => WithDrawPage()),
+        );
+      }),
       IconDataCenterInfo("assets/icons/2.png", "数据分析", () {
         Navigator.push(
           context,
@@ -313,33 +318,23 @@ class _CenterPageState extends State<CenterPage> {
                           onTap: () {
                             print('点击了第 ${index + 1} 张图片');
                           },
-                          child: Image.network(
+                          child: Image.asset(
                             images[index],
                             fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value:
-                                      loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey[200],
-                                child: Center(
-                                  child: Icon(
-                                    Icons.broken_image,
-                                    size: 50,
-                                    color: Colors.grey[400],
-                                  ),
-                                ),
-                              );
-                            },
+                            width: double.infinity,
+                            height: 120,
+                            // loadingBuilder: (context, child, loadingProgress) {
+                            //   if (loadingProgress == null) return child;
+                            //   return Center(
+                            //     child: CircularProgressIndicator(
+                            //       value:
+                            //           loadingProgress.expectedTotalBytes != null
+                            //           ? loadingProgress.cumulativeBytesLoaded /
+                            //                 loadingProgress.expectedTotalBytes!
+                            //           : null,
+                            //     ),
+                            //   );
+                            // },
                           ),
                         );
                       },

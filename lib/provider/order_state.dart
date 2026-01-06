@@ -3,9 +3,44 @@ import 'package:flutter/cupertino.dart';
 
 import '../page/order/order.dart';
 
+class WithDrawInfo {
+  int id;
+  String date;
+  String amount;
+
+  WithDrawInfo(this.id, this.amount, this.date);
+
+  WithDrawInfo copyWith({int? id, String? date, String? amount}) {
+    return WithDrawInfo(
+      id ?? this.id,
+      amount ?? this.amount,
+      date ?? this.date,
+    );
+  }
+}
+
 class OrderState extends ChangeNotifier {
   List<OrderInfo> _orders = [];
+  List<WithDrawInfo> _withDraws = [];
+
+  // List<WithDrawInfo> get withDraws => _withDraws;
+
+   List<WithDrawInfo> get withDraws {
+    final sorted = List<WithDrawInfo>.from(_withDraws);
+    sorted.sort((a, b) {
+      try {
+        final dateA = DateTime.parse(a.date.replaceAll(' ', 'T'));
+        final dateB = DateTime.parse(b. date.replaceAll(' ', 'T'));
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return b.date.compareTo(a.date);
+      }
+    });
+    return sorted;
+  }
+
   List<OrderInfo> get orders => _orders;
+
   List<OrderInfo> _generateFakeOrderData(int count) {
     final List<String> names = [
       "张三",
@@ -51,11 +86,22 @@ class OrderState extends ChangeNotifier {
   OrderState() {
     _orders = _generateFakeOrderData(10);
     _orders.sort((a, b) => b.id.compareTo(a.id));
+    _withDraws = List.generate(
+      4,
+      (i) => WithDrawInfo(
+        i + 1,
+        (80 + i * 2.5).toStringAsFixed(2), // 金额变化
+        "2025年12月${(i + 1).toString().padLeft(2, '0')}日 18:18:${(10 + i).toString().padLeft(2, '0')}", // 日期变化
+      ),
+    );
   }
 
   void addOrder(OrderInfo order) {
     final int newOrderId = _orders.first.id + 1;
-    final newOrder = order.copyWith(id: newOrderId,avatarUrl:"https://picsum.photos/200/300?random=${Random().nextInt(10)}");
+    final newOrder = order.copyWith(
+      id: newOrderId,
+      avatarUrl: "https://picsum.photos/200/300?random=${Random().nextInt(10)}",
+    );
     List<OrderInfo> newOrders = List.from(_orders);
     newOrders.add(newOrder);
     newOrders.sort((a, b) => b.id.compareTo(a.id));
@@ -65,7 +111,7 @@ class OrderState extends ChangeNotifier {
 
   void deleteOrder(int orderId) {
     final index = _orders.indexWhere((element) => element.id == orderId);
-    if(index == -1){
+    if (index == -1) {
       return;
     }
     final List<OrderInfo> newOrders = List.from(_orders);
@@ -82,6 +128,38 @@ class OrderState extends ChangeNotifier {
     final List<OrderInfo> newOrders = List.from(_orders);
     newOrders[index] = order;
     _orders = newOrders;
+    notifyListeners();
+  }
+
+
+  void addWithDraw(WithDrawInfo withDraw) {
+    final int newWithDrawId = _withDraws.first.id + 1;
+    final WithDrawInfo newWithDraw = withDraw.copyWith(id: newWithDrawId);
+    List<WithDrawInfo> newWithDrawList = List.from(_withDraws);
+    newWithDrawList.add(newWithDraw);
+    _withDraws = newWithDrawList;
+    notifyListeners();
+  }
+
+  void deleteWithDraw(int withDrawId) {
+    final index = _withDraws.indexWhere((element) => element.id == withDrawId);
+    if (index == -1) {
+      return;
+    }
+    final List<WithDrawInfo> newWithDraw = List.from(_withDraws);
+    newWithDraw.removeAt(index);
+    _withDraws = newWithDraw;
+    notifyListeners();
+  }
+
+  void updateWithDraw(WithDrawInfo withDraw) {
+    final index = _withDraws.indexWhere((element) => element.id == withDraw.id);
+    if (index == -1) {
+      return;
+    }
+    final List<WithDrawInfo> newWithDraw = List.from(_withDraws);
+    newWithDraw[index] = withDraw;
+    _withDraws = newWithDraw;
     notifyListeners();
   }
 }

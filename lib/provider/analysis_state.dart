@@ -58,4 +58,8 @@ class AnalysisState extends ChangeNotifier {
     _analyses = newList;
     notifyListeners();
   }
+
+
+
+
 }

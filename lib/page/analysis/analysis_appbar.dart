@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../widgets/svg_button.dart';
 import 'analysis_edit.dart';
 
 class AnalysisAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -39,20 +40,31 @@ class AnalysisAppbar extends StatelessWidget implements PreferredSizeWidget {
                     padding: EdgeInsets.only(left: 8, right: 8),
                     height: _contentHeight * 0.6,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20), // 可选：添加圆角
+                        border: Border.all(width: 1,color: Colors.grey[200]!)
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _createButton(CupertinoIcons.cube, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => AnalysisEditPage()),
-                          );
-                        }),
+                        SvgIconButton(
+                          assetName: 'assets/svg/more.svg',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => AnalysisEditPage()),
+                            );
+                          },
+                          color: Colors.black87,
+                          iconSize: 14.sp,
+                        ),
                         _buildDivider(),
-                        _createButton(CupertinoIcons.cube, () {}),
+                        SvgIconButton(
+                          assetName: 'assets/svg/close.svg',
+                          onPressed: () {},
+                          color: Colors.black87,
+                          iconSize: 14.sp,
+                        ),
                       ],
                     ),
                   ),

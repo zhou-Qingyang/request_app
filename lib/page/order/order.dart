@@ -77,6 +77,7 @@ class _OrderPageState extends State<OrderPage> {
     _scrollController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final double paddingHeight = MediaQuery.of(context).padding.top + 44.h;

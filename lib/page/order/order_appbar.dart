@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quest_app/page/order/order_edit.dart';
 import '../../helper/style.dart';
+import '../widgets/svg_button.dart';
 
 class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
   final double _contentHeight = 44.h;
@@ -31,12 +32,13 @@ class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
                 Positioned(
                   left: 0,
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       _createButton2(CupertinoIcons.chevron_left, () {
                         Navigator.pop(context);
                       }),
                       const SizedBox(width: 20),
-                      _createButton2(CupertinoIcons.cube, () {}),
+                      Image.asset("assets/icons/16.png", width: 18, height: 18),
                     ],
                   ),
                 ),
@@ -47,20 +49,33 @@ class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
                     padding: EdgeInsets.only(left: 8, right: 8),
                     height: _contentHeight * 0.6,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20), // 可选：添加圆角
+                      border: Border.all(width: 1,color: Colors.grey[200]!)
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _createButton(CupertinoIcons.cube, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => OrderEditPage()),
-                          );
-                        }),
+                        SvgIconButton(
+                          assetName: 'assets/svg/more.svg',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderEditPage(),
+                              ),
+                            );
+                          },
+                          color: Colors.black87,
+                          iconSize: 14.sp,
+                        ),
                         _buildDivider(),
-                        _createButton(CupertinoIcons.cube, () {}),
+                        SvgIconButton(
+                          assetName: 'assets/svg/close.svg',
+                          onPressed: () {},
+                          color: Colors.black87,
+                          iconSize: 14.sp,
+                        ),
                       ],
                     ),
                   ),
@@ -82,22 +97,6 @@ class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _createButton(IconData icon, VoidCallback onPressed) {
-    return IconButton(
-      padding: const EdgeInsets.all(0),
-      iconSize: 16.sp,
-      alignment: Alignment.center,
-      constraints: BoxConstraints(
-        minHeight: _contentHeight,
-        maxHeight: _contentHeight,
-      ),
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      icon: Icon(icon, color: Colors.black),
-      onPressed: onPressed,
-    );
-  }
-
   Widget _createButton2(IconData icon, VoidCallback onPressed) {
     return IconButton(
       padding: const EdgeInsets.all(0),
@@ -113,8 +112,6 @@ class OrderAppbar extends StatelessWidget implements PreferredSizeWidget {
       onPressed: onPressed,
     );
   }
-
-
 
   @override
   Size get preferredSize {

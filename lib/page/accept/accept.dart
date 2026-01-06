@@ -7,6 +7,7 @@ import 'package:quest_app/page/accept/accept_edit.dart';
 import 'package:quest_app/page/accept/progress.dart';
 import 'package:quest_app/provider/accept_state.dart';
 import '../../helper/style.dart';
+import '../widgets/svg_button.dart';
 
 class AcceptPage extends StatefulWidget {
   const AcceptPage({super.key});
@@ -43,10 +44,6 @@ class _AcceptPageState extends State<AcceptPage> {
 
   @override
   void dispose() {
-    // if (_scrollController != null) {
-    //   _scrollController.dispose(); // 确保控制器释放
-    // }
-    // _scrollController.dispose();
     super.dispose();
   }
 
@@ -84,7 +81,7 @@ class _AcceptPageState extends State<AcceptPage> {
                     height: 200,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage("https://picsum.photos/200"),
+                        image: AssetImage("assets/images/bg.png"),
                         fit: BoxFit.cover, // 图片适配方式（关键，下文详解）
                       ),
                     ),
@@ -116,22 +113,30 @@ class _AcceptPageState extends State<AcceptPage> {
                                   padding: EdgeInsets.only(left: 8, right: 8),
                                   height: _contentHeight * 0.6,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(
-                                      20,
-                                    ), // 可选：添加圆角
+                                    color: Color(0xFFedf2fe),
+                                    borderRadius: BorderRadius.circular(20), // 可选：添加圆角
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      _createButton(CupertinoIcons.cube, () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => AcceptEditPage()),
-                                        );
-                                      }),
+                                      SvgIconButton(
+                                        assetName: 'assets/svg/more.svg',
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => AcceptEditPage()),
+                                          );
+                                        },
+                                        color: Colors.black87,
+                                        iconSize: 14.sp,
+                                      ),
                                       _buildDivider(),
-                                      _createButton(CupertinoIcons.cube, () {}),
+                                      SvgIconButton(
+                                        assetName: 'assets/svg/close.svg',
+                                        onPressed: () {},
+                                        color: Colors.black87,
+                                        iconSize: 14.sp,
+                                      ),
                                     ],
                                   ),
                                 ),
