@@ -19,19 +19,60 @@ class WithDrawInfo {
   }
 }
 
+class PaymentRecord {
+  final int id;
+  final DateTime paymentDate;
+  final double amount;
+
+  PaymentRecord({
+    required this.id,
+    required this.paymentDate,
+    required this.amount,
+  });
+
+  PaymentRecord copyWith({int? id, DateTime? paymentDate, double? amount}) {
+    return PaymentRecord(
+      id: id ?? this.id,
+      paymentDate: paymentDate ?? this.paymentDate,
+      amount: amount ?? this.amount,
+    );
+  }
+}
+
 class OrderState extends ChangeNotifier {
   List<OrderInfo> _orders = [];
   List<WithDrawInfo> _withDraws = [];
+  List<PaymentRecord> _paymentRecords = [];
 
   double get totalAmount {
     if (_withDraws.isEmpty) return 0.0;
     return _withDraws.fold(0.0, (sum, item) {
       try {
-        return sum + double. parse(item.amount);
+        return sum + double.parse(item.amount);
       } catch (e) {
         return sum;
       }
     });
+  }
+
+  List<PaymentRecord> _generateMockPaymentRecords(int count) {
+    final random = Random();
+    final List<PaymentRecord> records = [];
+    for (int i = 0; i < count; i++) {
+      final randomMonths = random.nextInt(12);
+      final randomDays = random.nextInt(28) + 1;
+      records.add(PaymentRecord(
+        id: i + 1,
+        paymentDate: DateTime(
+          DateTime.now().year,
+          DateTime.now().month - randomMonths,
+          randomDays,
+        ),
+        amount: 100 + random.nextDouble() * 9900,
+      ));
+    }
+    records.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
+    return records;
   }
 
   String get formattedTotalAmount {
@@ -53,6 +94,11 @@ class OrderState extends ChangeNotifier {
   }
 
   List<OrderInfo> get orders => _orders;
+  List<PaymentRecord> get paymentRecords {
+    final sorted = List<PaymentRecord>.from(_paymentRecords);
+    sorted.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
+    return sorted;
+  }
 
   List<OrderInfo> _generateFakeOrderData(int count) {
     final List<String> names = [
@@ -107,6 +153,7 @@ class OrderState extends ChangeNotifier {
         "2025年12月${(i + 1).toString().padLeft(2, '0')}日 18:18:${(10 + i).toString().padLeft(2, '0')}", // 日期变化
       ),
     );
+    _paymentRecords = _generateMockPaymentRecords(10);
   }
 
   void addOrder(OrderInfo order) {
@@ -172,6 +219,43 @@ class OrderState extends ChangeNotifier {
     final List<WithDrawInfo> newWithDraw = List.from(_withDraws);
     newWithDraw[index] = withDraw;
     _withDraws = newWithDraw;
+    notifyListeners();
+  }
+
+  void addPaymentRecord(PaymentRecord record) {
+    final int newRecordId = _paymentRecords.isEmpty
+        ? 1
+        : _paymentRecords.map((e) => e.id).reduce((a, b) => a > b ? a : b) + 1;
+
+    final PaymentRecord newRecord = record.copyWith(id: newRecordId);
+    List<PaymentRecord> newRecordList = List.from(_paymentRecords);
+    newRecordList.add(newRecord);
+
+    _paymentRecords = newRecordList;
+    notifyListeners();
+  }
+
+  /// 删除PaymentRecord
+  void deletePaymentRecord(int recordId) {
+    final index = _paymentRecords.indexWhere((element) => element.id == recordId);
+    if (index == -1) { // 未找到则直接返回
+      return;
+    }
+    List<PaymentRecord> newRecordList = List.from(_paymentRecords);
+    newRecordList.removeAt(index);
+    _paymentRecords = newRecordList;
+    notifyListeners();
+  }
+
+  /// 更新PaymentRecord
+  void updatePaymentRecord(PaymentRecord record) {
+    final index = _paymentRecords.indexWhere((element) => element.id == record.id);
+    if (index == -1) { // 未找到则直接返回
+      return;
+    }
+    List<PaymentRecord> newRecordList = List.from(_paymentRecords);
+    newRecordList[index] = record;
+    _paymentRecords = newRecordList;
     notifyListeners();
   }
 }

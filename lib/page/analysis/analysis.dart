@@ -7,8 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
+import 'package:quest_app/page/widgets/svg_button.dart';
 import 'package:quest_app/provider/analysis_state.dart';
-
 import '../../helper/style.dart';
 import 'analysis_appbar.dart';
 
@@ -22,14 +22,16 @@ class AnalysisData {
   final int resolveRate;
   final String date;
 
-  AnalysisData(this.orderCount,
-      this.responseRate,
-      this.positiveRate,
-      this.negativeRate,
-      this.repeatCount,
-      this.noLimitOrderCount,
-      this.resolveRate,
-      this.date,);
+  AnalysisData(
+    this.orderCount,
+    this.responseRate,
+    this.positiveRate,
+    this.negativeRate,
+    this.repeatCount,
+    this.noLimitOrderCount,
+    this.resolveRate,
+    this.date,
+  );
 
   AnalysisData copyWith({
     int? orderCount,
@@ -101,10 +103,7 @@ class _AnalysisState extends State<Analysis> {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingHeight = MediaQuery
-        .of(context)
-        .padding
-        .top + 44.h;
+    final double paddingHeight = MediaQuery.of(context).padding.top + 44.h;
     return Scaffold(
       backgroundColor: Styles.mainBackground,
       extendBodyBehindAppBar: true,
@@ -121,10 +120,7 @@ class _AnalysisState extends State<Analysis> {
       body: Padding(
         padding: EdgeInsets.only(top: paddingHeight),
         child: Column(
-          children: [
-            _buildAdvancedHorizontalList(),
-            _buildPageView(context),
-          ],
+          children: [_buildAdvancedHorizontalList(), _buildPageView(context)],
         ),
       ),
     );
@@ -132,7 +128,7 @@ class _AnalysisState extends State<Analysis> {
 
   Widget _buildAdvancedHorizontalList() {
     return Container(
-      height: 40,
+      height: 32,
       padding: const EdgeInsets.only(top: 5),
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -164,7 +160,7 @@ class _AnalysisState extends State<Analysis> {
 
   Widget _buildTabItem({required String title, required bool isSelected}) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
@@ -174,7 +170,6 @@ class _AnalysisState extends State<Analysis> {
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
-        const SizedBox(height: 4),
         Container(
           width: 20,
           height: 2,
@@ -189,16 +184,16 @@ class _AnalysisState extends State<Analysis> {
 
   Widget _buildPageView(BuildContext context) {
     final List<AnalysisData> analysisData = context.select(
-          (AnalysisState r) => r.analyses,
+      (AnalysisState r) => r.analyses,
     );
     final List<ServiceDataInfo> serviceData = context.select(
-          (AnalysisState r) => r.serviceData,
+      (AnalysisState r) => r.serviceData,
     );
     final int quoteOrderLimit = context.select(
-          (AnalysisState r) => r.quoteOrderLimit,
+      (AnalysisState r) => r.quoteOrderLimit,
     );
     final Map<String, int> hexagonData = context.select(
-          (AnalysisState r) => r.hexagonData,
+      (AnalysisState r) => r.hexagonData,
     );
     return Expanded(
       child: PageView.builder(
@@ -213,7 +208,13 @@ class _AnalysisState extends State<Analysis> {
         itemBuilder: (context, index) {
           if (index == 0) {
             return _buildFirstPage(
-                analysisData, serviceData, quoteOrderLimit, hexagonData);
+              analysisData,
+              serviceData,
+              quoteOrderLimit,
+              hexagonData,
+            );
+          } else if (index == 2) {
+            return _buildIncomeAnalysisPage();
           }
           return Container(
             alignment: Alignment.center,
@@ -227,9 +228,12 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildFirstPage(List<AnalysisData> analysisData,
-      List<ServiceDataInfo> serviceData, int quoteOrderLimit,
-      Map<String, int> hexagonData) {
+  Widget _buildFirstPage(
+    List<AnalysisData> analysisData,
+    List<ServiceDataInfo> serviceData,
+    int quoteOrderLimit,
+    Map<String, int> hexagonData,
+  ) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -250,11 +254,59 @@ class _AnalysisState extends State<Analysis> {
                   ),
                 ),
                 height: 300,
+                width: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: Align(
                     alignment: Alignment.topCenter,
-                    child: HexagonIndicatorWidget(size: 200, hexagonMap:hexagonData),
+                    child: HexagonIndicatorWidget(
+                      size: 200,
+                      hexagonMap: hexagonData,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 10,
+                right: 10.w,
+                child: TextButton(
+                  onPressed: () {
+                    print('按钮被点击');
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    side: BorderSide(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r), // 圆角
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 2.h,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12)
+                        ),
+                        child: SvgIconButton(
+                          assetName: "assets/svg/exchange.svg",
+                          onPressed: () {},
+                          color:  Styles.themeStartColor,
+                          iconSize: 8.sp,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Text('近30天对比', style: TextStyle(fontSize: 12.sp)),
+                    ],
                   ),
                 ),
               ),
@@ -333,7 +385,7 @@ class _AnalysisState extends State<Analysis> {
           ),
           const SizedBox(height: 6),
           Text(
-            "您的服务能力有待提高，当日每日答题数量上限为40题",
+            "您的服务能力有待提高，当日每日答题数量上限为$quoteOrderLimit题",
             style: TextStyle(
               color: Styles.chevronRightIconColor,
               fontSize: 12.sp,
@@ -411,7 +463,7 @@ class _AnalysisState extends State<Analysis> {
                 }),
               ],
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             Expanded(
               child: GridView.builder(
                 padding: EdgeInsets.only(top: 0),
@@ -433,7 +485,6 @@ class _AnalysisState extends State<Analysis> {
       ),
     );
   }
-
 
   Widget _buildServiceDataItem(ServiceDataInfo serviceData) {
     return Column(
@@ -497,10 +548,10 @@ class _AnalysisState extends State<Analysis> {
     const double titleHeight = 30.0; // "明细数据"标题高度
     final double tableHeight =
         titleHeight +
-            headerHeight +
-            (sortedDates.length * rowHeight) +
-            paddingHeight +
-            10;
+        headerHeight +
+        (sortedDates.length * rowHeight) +
+        paddingHeight +
+        10;
     final double finalHeight = tableHeight.clamp(200.0, 600.0);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -573,20 +624,19 @@ class _AnalysisState extends State<Analysis> {
                                 children: _tableHeaders
                                     .sublist(1)
                                     .map(
-                                      (header) =>
-                                      Expanded(
+                                      (header) => Expanded(
                                         child: _buildTableHeaderCell(
                                           header,
                                           titleHeight,
                                         ),
                                       ),
-                                )
+                                    )
                                     .toList(),
                               );
                             }
                             final date = sortedDates[index - 1];
                             final data = analysisData.firstWhere(
-                                  (i) => i.date == date,
+                              (i) => i.date == date,
                             );
                             return Row(
                               children: [
@@ -666,10 +716,11 @@ class _AnalysisState extends State<Analysis> {
   }
 
   // 表格数据单元格
-  Widget _buildTableDataCell(String text,
-      double height, {
-        bool isFixed = false,
-      }) {
+  Widget _buildTableDataCell(
+    String text,
+    double height, {
+    bool isFixed = false,
+  }) {
     return Container(
       height: height,
       alignment: Alignment.center,
@@ -694,8 +745,9 @@ class _AnalysisState extends State<Analysis> {
   };
 
   (double minValue, double maxValue) getMinMaxByTrendIndex(
-      List<AnalysisData> analysisData,
-      int trendIndex,) {
+    List<AnalysisData> analysisData,
+    int trendIndex,
+  ) {
     // 空数据兜底
     if (analysisData.isEmpty) {
       return (0.0, 0.0);
@@ -720,17 +772,13 @@ class _AnalysisState extends State<Analysis> {
       ..sort((a, b) => dateFormat.parse(a).compareTo(dateFormat.parse(b)));
     final sortedData = List<AnalysisData>.from(analysisData)
       ..sort(
-            (a, b) =>
-            dateFormat.parse(a.date).compareTo(dateFormat.parse(b.date)),
+        (a, b) => dateFormat.parse(a.date).compareTo(dateFormat.parse(b.date)),
       );
     final (minValue, maxValue) = getMinMaxByTrendIndex(
       analysisData,
       filterIndex,
     );
-    final resolveRateSpots = sortedData
-        .asMap()
-        .entries
-        .map((entry) {
+    final resolveRateSpots = sortedData.asMap().entries.map((entry) {
       final index = entry.key;
       final data = entry.value;
       final valueGetter = trendValueGetter[filterIndex];
@@ -1011,17 +1059,222 @@ class _AnalysisState extends State<Analysis> {
       ),
     );
   }
+
+  Widget _buildIncomeAnalysisPage() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+              decoration: BoxDecoration(
+                color: Color(0xFFf7f8fe),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/icons/17.png", width: 12, height: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    "答主收益说明",
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.grey,
+                    size: 12.sp,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.w),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: AssetImage("assets/images/bg2.png"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "本月税前收益",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Color(0xFFc0dcff),
+                          ),
+                        ),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 2.w),
+                            child: Icon(
+                              Icons.help_outline,
+                              size: 14.sp,
+                              color: Color(0xFFc0dcff),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    "0.00",
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RichText(
+                        textAlign: TextAlign.center, // 设置文本居中
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "可提现余额(元)",
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Color(0xFFc0dcff),
+                              ),
+                            ),
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 2.w),
+                                child: Icon(
+                                  Icons.help_outline,
+                                  size: 14.sp,
+                                  color: Color(0xFFc0dcff),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "0.00",
+                        style: TextStyle(fontSize: 12.sp, color: Colors.white),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "打款明细",
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: Color(0xFFc0dcff),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF3f6ff4),
+                          side: BorderSide(
+                            color: Color(0xFF3f6ff4).withOpacity(0.1), // 边框颜色
+                            width: 1,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.r), // 圆角
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2.h,
+                          ),
+                        ),
+                        child: Text(
+                          '立即提现',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Divider(height: 1, color: Color(0xFFc0dcff).withOpacity(0.1)),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.help_outline,
+                        color: Colors.white,
+                        size: 10.sp,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        "提现后百度将为您申报个税，可在个税APP查询",
+                        style: TextStyle(fontSize: 12.sp, color: Colors.white),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "反馈",
+                        style: TextStyle(fontSize: 10.sp, color: Colors.white),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                        size: 10.sp,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class HexagonPainter extends CustomPainter {
   final int layerCount;
   final double maxRadius;
   final Color borderColor;
+  final Map<String, int> hexagonMap;
+  final Map<int, String> indicatorTitles;
 
   HexagonPainter({
     required this.layerCount,
     required this.maxRadius,
     required this.borderColor,
+    required this.hexagonMap,
+    required this.indicatorTitles,
   });
 
   @override
@@ -1039,6 +1292,8 @@ class HexagonPainter extends CustomPainter {
       canvas.drawPath(hexagonPath, paint);
       _drawRadiantLines(canvas, center, radius, paint);
     }
+
+    _drawDataArea(canvas, center);
   }
 
   Path _getRotatedHexagonPath(Offset center, double radius) {
@@ -1057,10 +1312,12 @@ class HexagonPainter extends CustomPainter {
     return path;
   }
 
-  void _drawRadiantLines(Canvas canvas,
-      Offset center,
-      double radius,
-      Paint paint,) {
+  void _drawRadiantLines(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
     for (int i = 0; i < 6; i++) {
       double angle = ((60 * i) + 90) * pi / 180;
       double x = center.dx + radius * cos(angle);
@@ -1069,21 +1326,83 @@ class HexagonPainter extends CustomPainter {
     }
   }
 
-  // Path _getHexagonPath(Offset center, double radius) {
-  //   Path path = Path();
-  //   for (int i = 0; i < 6; i++) {
-  //     double angle = 60 * i * pi / 180;
-  //     double x = center.dx + radius * cos(angle);
-  //     double y = center.dy + radius * sin(angle);
-  //     if (i == 0) {
-  //       path.moveTo(x, y);
-  //     } else {
-  //       path.lineTo(x, y);
-  //     }
-  //   }
-  //   path.close();
-  //   return path;
-  // }
+  void _drawDataArea(Canvas canvas, Offset center) {
+    Path dataPath = Path();
+    List<Offset> dataPoints = [];
+
+    // 计算每个指标的位置点
+    for (int i = 0; i < 6; i++) {
+      String title = indicatorTitles[i]!;
+      int score = hexagonMap[title] ?? 0;
+
+      // 确保分数在 0-100 范围内
+      score = score.clamp(0, 100);
+
+      // 计算该点在轴线上的位置（根据分数占比）
+      double ratio = score / 100.0;
+      double radius = maxRadius * ratio;
+
+      double angle = ((60 * i) + 90) * pi / 180;
+      double x = center.dx + radius * cos(angle);
+      double y = center.dy + radius * sin(angle);
+
+      Offset point = Offset(x, y);
+      dataPoints.add(point);
+
+      if (i == 0) {
+        dataPath.moveTo(x, y);
+      } else {
+        dataPath.lineTo(x, y);
+      }
+    }
+    dataPath.close();
+
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFF69c8f8).withOpacity(1), // 顶部颜色
+        Color(0xFF69c8f8).withOpacity(0.3), //底部颜色
+      ],
+      stops: [0.0, 1.0],
+    );
+
+    final rect = Rect.fromCircle(center: center, radius: maxRadius);
+
+    // 填充渐变色
+    final fillPaint = Paint()
+      ..shader = gradient.createShader(rect)
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    canvas.drawPath(dataPath, fillPaint);
+
+    // 绘制数据区域边框
+    final borderPaint = Paint()
+      ..color = Color(0xFF7ec3fe)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.w
+      ..isAntiAlias = true;
+
+    canvas.drawPath(dataPath, borderPaint);
+
+    // final pointPaint = Paint()
+    //   ..color = Color(0xFF4A90E2)
+    //   ..style = PaintingStyle.fill
+    //   ..isAntiAlias = true;
+
+    // for (Offset point in dataPoints) {
+    //   canvas.drawCircle(point, 4.w, pointPaint);
+    //
+    //   final pointBorderPaint = Paint()
+    //     ..color = Colors.white
+    //     ..style = PaintingStyle.stroke
+    //     .. strokeWidth = 1.5.w
+    //     ..isAntiAlias = true;
+    //
+    //   canvas.drawCircle(point, 4.w, pointBorderPaint);
+    // }
+  }
 
   @override
   bool shouldRepaint(covariant HexagonPainter oldDelegate) {
@@ -1102,9 +1421,9 @@ class HexagonIndicatorWidget extends StatelessWidget {
     {'icon': Icons.miscellaneous_services_outlined, 'text': '服务表现'},
     {'icon': Icons.shopping_cart_outlined, 'text': '复购表现'},
   ];
-\
-
-  final Map<int, String> indicaTitles = {
+  final double size;
+  final Map<String, int> hexagonMap;
+  final Map<int, String> indicatorTitles = {
     0: "用户反馈",
     1: "服务表现",
     2: "复购表现",
@@ -1113,14 +1432,19 @@ class HexagonIndicatorWidget extends StatelessWidget {
     5: "原创表现",
   };
 
-  final double size;
-  final Map<String, int> hexagonMap;
-
-  HexagonIndicatorWidget(
-      {super.key, required this.size, required this.hexagonMap});
+  HexagonIndicatorWidget({
+    super.key,
+    required this.size,
+    required this.hexagonMap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    int sum = 0;
+    hexagonMap.forEach((key, value) {
+      sum += value;
+    });
+    final int totalAbilityCount = (sum / 600 * 100).toInt();
     final center = size / 2;
     final maxRadius = size / 2;
     return SizedBox(
@@ -1136,8 +1460,11 @@ class HexagonIndicatorWidget extends StatelessWidget {
               layerCount: 6,
               maxRadius: size * 0.6 / 2,
               borderColor: Styles.hexagonBorderColor,
+              hexagonMap: hexagonMap,
+              indicatorTitles: indicatorTitles,
             ),
           ),
+
           ...List.generate(6, (index) {
             double angle = ((60 * index) + 90) * pi / 180;
             double x = center + maxRadius * cos(angle);
@@ -1161,7 +1488,7 @@ class HexagonIndicatorWidget extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      hexagonMap[indicaTitles[index]!].toString(),
+                      hexagonMap[indicatorTitles[index]!].toString(),
                       style: TextStyle(fontSize: 16.sp, color: Colors.white),
                     ),
                     Row(
@@ -1174,7 +1501,7 @@ class HexagonIndicatorWidget extends StatelessWidget {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          indicaTitles[index]!,
+                          indicatorTitles[index]!,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 12.sp,
@@ -1187,14 +1514,25 @@ class HexagonIndicatorWidget extends StatelessWidget {
               ),
             );
           }),
-          // Text(
-          //   '待评估',
-          //   style: TextStyle(
-          //     color: Styles.mainFontColor,
-          //     fontSize: 18.sp,
-          //     fontWeight: FontWeight.bold,
-          //   ),
-          // ),
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '$totalAbilityCount\n',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: '总能力分',
+                  style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

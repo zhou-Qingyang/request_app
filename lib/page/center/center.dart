@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:quest_app/page/accept/accept.dart';
 import 'package:quest_app/page/analysis/analysis.dart';
+import 'package:quest_app/page/analysis/payment.dart';
 import 'package:quest_app/page/order/order.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
 import 'package:quest_app/page/withDraw/with_draw.dart';
@@ -104,7 +105,12 @@ class _CenterPageState extends State<CenterPage> {
           MaterialPageRoute(builder: (context) => OrderPage()),
         );
       }),
-      IconDataCenterInfo("assets/icons/5.png", "成长中心", () {}),
+      IconDataCenterInfo("assets/icons/5.png", "成长中心", () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PaymentPage()),
+        );
+      }),
       IconDataCenterInfo("assets/icons/6.png", "问币商城", () {}),
       IconDataCenterInfo("assets/icons/7.png", "我的周报", () {}),
       IconDataCenterInfo("assets/icons/8.png", "答主学院", () {}),

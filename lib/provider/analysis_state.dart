@@ -95,5 +95,25 @@ class AnalysisState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateServiceData(ServiceDataInfo data) {
+    final index = _serviceData.indexWhere((item) => item.id == data.id);
+    if (index == -1) {
+      return;
+    }
+    final List<ServiceDataInfo> newList = List.from(_serviceData);
+    newList[index] = data;
+    _serviceData = newList;
+    notifyListeners();
+  }
 
+  void updateQuoteOrderLimit(int quote){
+    _quoteOrderLimit = quote;
+    notifyListeners();
+  }
+
+  void updateHexagonData(String key,int value){
+     final Map<String,int> newHexagonData = {..._hexagonData, key: value};
+    _hexagonData = newHexagonData;
+    notifyListeners();
+  }
 }
