@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:quest_app/page/analysis/analysis.dart';
 
+import '../model/question.dart';
+
 class ServiceDataInfo {
   int id;
   String title;
@@ -36,7 +38,7 @@ class AnalysisState extends ChangeNotifier {
   List<AnalysisData> get analyses => _analyses;
   Map<String, int> get hexagonData => _hexagonData;
 
-  List<AnalysisData> _generate30DaysData() {
+  void _generate30DaysData() {
     final List<AnalysisData> data = [];
     final now = DateTime.now();
     final dateFormat = DateFormat('yyyy.MM.dd');
@@ -64,7 +66,8 @@ class AnalysisState extends ChangeNotifier {
         ),
       );
     }
-    return data;
+    _analyses = data;
+    _analyses.sort((a, b) => b.date.compareTo(a.date));
   }
 
   int _getRandomInt(int min, int max, Random random) {
@@ -72,8 +75,8 @@ class AnalysisState extends ChangeNotifier {
   }
 
   AnalysisState() {
-    _analyses = _generate30DaysData();
-    _analyses.sort((a, b) => b.date.compareTo(a.date));
+    _generate30DaysData();
+    _generateRandomQuestions();
     _serviceData = [
       ServiceDataInfo(1, "订单量", 1250, 980),
       ServiceDataInfo(2, "5分钟响应率", 3456, 3102),
@@ -114,6 +117,77 @@ class AnalysisState extends ChangeNotifier {
   void updateHexagonData(String key,int value){
      final Map<String,int> newHexagonData = {..._hexagonData, key: value};
     _hexagonData = newHexagonData;
+    notifyListeners();
+  }
+
+  List<QuestionInfo> _questions = [];
+
+  List<QuestionInfo> get questions => _questions;
+
+  // 生成随机数据
+  void _generateRandomQuestions() {
+    final Random random = Random();
+    final List<String> titles = [
+      'Flutter 页面路由问题',
+      '数据库连接超时',
+      'API 接口返回异常',
+      '用户登录验证失败',
+      '图片上传功能异常',
+      '支付模块集成问题',
+      '推送通知不显示',
+      '列表滚动卡顿优化',
+      '多语言切换问题',
+      '暗黑模式适配问题',
+    ];
+    _questions = List. generate(10, (index) {
+      final now = DateTime.now();
+      final acceptTime = now.subtract(Duration(days: random.nextInt(30)));
+      final paymentTime = acceptTime.add(Duration(days: random.nextInt(15) + 5));
+      return QuestionInfo(
+        id: index + 1,
+        title: titles[index],
+        expectedPaymentTime:  _formatDate(paymentTime),
+        acceptTime: _formatDate(acceptTime),
+        paymentAmount: (random.nextInt(5000) + 1000).toDouble(),
+      );
+    });
+    _questions.sort((a, b) => b.expectedPaymentTime.compareTo(a.expectedPaymentTime));
+    notifyListeners();
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  void addQuestion(QuestionInfo question) {
+    final int newQuestionId = _questions.isEmpty ? 1 : _questions. first.id + 1;
+    final newQuestion = question.copyWith(id: newQuestionId);
+    List<QuestionInfo> newQuestions = List.from(_questions);
+    newQuestions.add(newQuestion);
+    newQuestions.sort((a, b) => b.id.compareTo(a. id));
+    _questions = newQuestions;
+    notifyListeners();
+  }
+
+  void deleteQuestion(int questionId) {
+    final index = _questions. indexWhere((element) => element.id == questionId);
+    if (index == -1) {
+      return;
+    }
+    final List<QuestionInfo> newQuestions = List.from(_questions);
+    newQuestions.removeAt(index);
+    _questions = newQuestions;
+    notifyListeners();
+  }
+
+  void updateQuestion(QuestionInfo question) {
+    final index = _questions.indexWhere((element) => element.id == question.id);
+    if (index == -1) {
+      return;
+    }
+    final List<QuestionInfo> newQuestions = List.from(_questions);
+    newQuestions[index] = question;
+    _questions = newQuestions;
     notifyListeners();
   }
 }

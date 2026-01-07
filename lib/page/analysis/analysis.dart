@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:quest_app/model/question.dart';
+import 'package:quest_app/page/analysis/question_edit.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
 import 'package:quest_app/page/widgets/svg_button.dart';
 import 'package:quest_app/provider/analysis_state.dart';
@@ -195,6 +197,9 @@ class _AnalysisState extends State<Analysis> {
     final Map<String, int> hexagonData = context.select(
       (AnalysisState r) => r.hexagonData,
     );
+    final List<QuestionInfo> questions = context.select(
+      (AnalysisState r) => r.questions,
+    );
     return Expanded(
       child: PageView.builder(
         controller: _pageController,
@@ -214,7 +219,7 @@ class _AnalysisState extends State<Analysis> {
               hexagonData,
             );
           } else if (index == 2) {
-            return _buildIncomeAnalysisPage();
+            return _buildIncomeAnalysisPage(questions);
           }
           return Container(
             alignment: Alignment.center,
@@ -295,12 +300,12 @@ class _AnalysisState extends State<Analysis> {
                         padding: const EdgeInsets.all(1),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(12)
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: SvgIconButton(
                           assetName: "assets/svg/exchange.svg",
                           onPressed: () {},
-                          color:  Styles.themeStartColor,
+                          color: Styles.themeStartColor,
                           iconSize: 8.sp,
                         ),
                       ),
@@ -537,7 +542,6 @@ class _AnalysisState extends State<Analysis> {
     const dateFormatPattern = 'yyyy.MM.dd';
     final dateFormat = DateFormat(dateFormatPattern);
     if (trendIndex == 0) {
-      //如果是近7天数据
       analysisData = analysisData.sublist(0, 7);
     }
     final sortedDates = analysisData.map((AnalysisData i) => i.date).toList()
@@ -545,7 +549,7 @@ class _AnalysisState extends State<Analysis> {
     const double headerHeight = 20.0; // 标题高度
     const double rowHeight = 20.0; // 每行数据高度
     const double paddingHeight = 20.0; // 上下内边距
-    const double titleHeight = 30.0; // "明细数据"标题高度
+    const double titleHeight = 20.0; // "明细数据"标题高度
     final double tableHeight =
         titleHeight +
         headerHeight +
@@ -648,7 +652,7 @@ class _AnalysisState extends State<Analysis> {
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
-                                    data.responseRate.toString(),
+                                    "${data.responseRate}%",
                                     rowHeight,
                                   ),
                                 ),
@@ -678,7 +682,7 @@ class _AnalysisState extends State<Analysis> {
                                 ),
                                 Expanded(
                                   child: _buildTableDataCell(
-                                    data.resolveRate.toString(),
+                                    "${data.resolveRate.toString()}%",
                                     rowHeight,
                                   ),
                                 ),
@@ -731,6 +735,158 @@ class _AnalysisState extends State<Analysis> {
         text,
         style: TextStyle(fontSize: 12, color: Colors.black54),
         textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildFixedColumnTable2(List<QuestionInfo> questions) {
+    final processedQuestions = questions.map((question) {
+      return question.copyWith(
+        expectedPaymentTime: _formatToMonth(question.expectedPaymentTime),
+        acceptTime: _formatToFullDate(question.acceptTime),
+      );
+    }).toList();
+
+    // const dateFormatPattern = 'yyyy-MM-dd'; // 修改为标准格式
+    // final dateFormat = DateFormat(dateFormatPattern);
+    final sortedQuestions = List<QuestionInfo>.from(processedQuestions)
+      ..sort((a, b) {
+        // final dateA = dateFormat.parse(a.acceptTime);
+        // final dateB = dateFormat.parse(b.acceptTime);
+        final dateCompare = b.expectedPaymentTime.compareTo(a.expectedPaymentTime);
+        if (dateCompare == 0) {
+          return b.id.compareTo(a.id); // ID大的在前
+        }
+        return dateCompare;
+      });
+    const double rowHeight = 20.0;
+    const double titleHeight = 20.0;
+    final double tableHeight = titleHeight + (sortedQuestions. length * rowHeight);
+    final double finalHeight = tableHeight.clamp(200.0, 600.0);
+    return Container(
+      height:  finalHeight,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset:  Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 120.w,
+                  decoration: BoxDecoration(
+                    border:  Border(
+                      right: BorderSide(color: Colors.grey[200]!, width: 1),
+                    ),
+                    color: Color(0xFFFAFAFA),
+                  ),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount:  sortedQuestions.length + 1,
+                    itemBuilder:  (context, index) {
+                      if (index == 0) {
+                        return _buildTableHeaderCell(
+                          '问题标题',
+                          titleHeight,
+                        );
+                      }
+                      final question = sortedQuestions[index - 1];
+                      return _buildTableDataCell(
+                        question.title,
+                        rowHeight,
+                        isFixed: true,
+                      );
+                    },
+                  ),
+                ),
+                // 可滚动列
+                Expanded(
+                  child:  SingleChildScrollView(
+                    padding: EdgeInsets.zero,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: (_tableHeaders2.length - 1) * 100. w,
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: sortedQuestions. length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Row(
+                              children: _tableHeaders2
+                                  .sublist(1)
+                                  .map(
+                                    (header) => SizedBox(
+                                  width: 100.w,
+                                  child: _buildTableHeaderCell(
+                                    header,
+                                    titleHeight,
+                                  ),
+                                ),
+                              ).toList(),
+                            );
+                          }
+                          final question = sortedQuestions[index - 1];
+                          return Row(
+                            children: [
+                              SizedBox(
+                                width: 100.w,
+                                child: _buildTableDataCell(
+                                  question.expectedPaymentTime,
+                                  rowHeight,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100.w,
+                                child: _buildTableDataCell(
+                                  question.acceptTime,
+                                  rowHeight,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100.w,
+                                child: _buildTableDataCell(
+                                  question.status,
+                                  rowHeight,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100.w,
+                                child: _buildTableDataCell(
+                                  question.reason,
+                                  rowHeight,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 100.w,
+                                child: _buildTableDataCell(
+                                  question.paymentAmount.toString(),
+                                  rowHeight,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1060,7 +1216,181 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildIncomeAnalysisPage() {
+  final List<String> titles3 = ["订单", "高考订单", "围观", "问币奖励", "任务奖励", "活动奖励"];
+
+  Widget _buildAdvancedHorizontalList3() {
+    return SizedBox(
+      height: 25,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        physics: const ClampingScrollPhysics(),
+        itemCount: titles3.length,
+        itemBuilder: (context, index) {
+          bool isSelected = index == 0;
+          return _buildCustomButton1(
+            title: filterTitles[index],
+            isSelected: isSelected,
+            onTap: () => {},
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCustomButton1({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(right: 6),
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 6),
+          backgroundColor: isSelected ? Color(0xFFeef0fe) : Color(0xFFf5f5f5),
+          foregroundColor: isSelected ? Color(0xFF4f6de4) : Color(0xFF545454),
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.r), // 圆角
+          ),
+        ),
+        child: Text(title, style: TextStyle(fontSize: 12.sp)),
+      ),
+    );
+  }
+
+  final List<String> incomeSwitch = ["订单分成", "订单奖励"];
+  int incomeSwitchIndex = 0; // 当前选中的索引
+  final List<String> _tableHeaders2 = [
+    '问题标题',
+    '预计打款时间',
+    '接单时间',
+    '状态',
+    '原因',
+    '支付金额',
+  ];
+
+  Widget _buildAdvancedHorizontalSwitch() {
+    return Container(
+      height: 25,
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+      decoration: BoxDecoration(
+        color: Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(6.r), // 圆角
+      ),
+      child: Row(
+        children: incomeSwitch.asMap().entries.map((entry) {
+          int index = entry.key;
+          String title = entry.value;
+          return _buildSwitchItem(
+            title: title,
+            isSelected: incomeSwitchIndex == index,
+            onTap: () {
+              setState(() {
+                incomeSwitchIndex = index;
+              });
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildSwitchItem({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 6),
+          backgroundColor: isSelected ? Colors.white : Color(0xFFf5f5f5),
+          foregroundColor: isSelected ? Color(0xFF4f6de4) : Color(0xFF545454),
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.r), // 圆角
+          ),
+        ),
+        child: Text(title, style: TextStyle(fontSize: 12.sp)),
+      ),
+    );
+  }
+
+  Widget _buildIncomeOptions() {
+    return Row(
+      children: [
+        Expanded(
+          child: RichText(
+            textAlign: TextAlign.left,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "可结算",
+                  style: TextStyle(fontSize: 12.sp, color: Color(0xFFa2a2a2)),
+                ),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Icon(
+                    Icons.arrow_drop_down_outlined,
+                    size: 16.sp,
+                    color: Color(0xFFa2a2a2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: RichText(
+            textAlign: TextAlign.center, // 设置文本居中
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "预计打款时间",
+                  style: TextStyle(fontSize: 12.sp, color: Color(0xFF535353)),
+                ),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Icon(
+                    Icons.arrow_drop_down_outlined,
+                    size: 16.sp,
+                    color: Color(0xFF535353),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "2026年02月",
+                  style: TextStyle(fontSize: 12.sp, color: Color(0xFF535353)),
+                ),
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Icon(
+                    Icons.arrow_drop_down_outlined,
+                    size: 16.sp,
+                    color: Color(0xFF535353),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIncomeAnalysisPage(List<QuestionInfo> questions) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1069,7 +1399,7 @@ class _AnalysisState extends State<Analysis> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
               decoration: BoxDecoration(
-                color: Color(0xFFf7f8fe),
+                color: Color(0xFFe5ebff),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
@@ -1250,9 +1580,77 @@ class _AnalysisState extends State<Analysis> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
             child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "明细",
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QuestionListPage(),
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.help_outline,
+                          color: Styles.chevronRightIconColor,
+                          size: 14.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  _buildAdvancedHorizontalList3(),
+                  const SizedBox(height: 4),
+                  _buildAdvancedHorizontalSwitch(),
+                  const SizedBox(height: 4),
+                  RichText(
+                    textAlign: TextAlign.left,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "总支付",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Color(0xFF515151),
+                          ),
+                        ),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Padding(padding: EdgeInsets.only(left: 4.w)),
+                        ),
+                        TextSpan(
+                          text: "0.00元",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildIncomeOptions(),
+                  const SizedBox(height: 4),
+                  _buildFixedColumnTable2(questions),
+                ],
               ),
             ),
           ),
@@ -1262,6 +1660,7 @@ class _AnalysisState extends State<Analysis> {
   }
 }
 
+// 分割线
 class HexagonPainter extends CustomPainter {
   final int layerCount;
   final double maxRadius;
@@ -1536,5 +1935,82 @@ class HexagonIndicatorWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+
+DateTime _parseDate(String dateStr) {
+  try {
+    dateStr = dateStr.trim();
+
+    if (dateStr. contains('.')) {
+      // 格式：2025.12.31 或 2025.12
+      final parts = dateStr.split('.');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+      } else if (parts.length == 2) {
+        return DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          1, // 默认为月初
+        );
+      }
+    } else if (dateStr.contains('-')) {
+      // 格式：2025-12-31 或 2025-12
+      final parts = dateStr.split('-');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+      } else if (parts.length == 2) {
+        return DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          1,
+        );
+      }
+    } else if (dateStr.contains('/')) {
+      // 格式：2025/12/31
+      final parts = dateStr.split('/');
+      return DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        parts.length >= 3 ? int.parse(parts[2]) : 1,
+      );
+    }
+
+    // 尝试直接解析
+    return DateTime.parse(dateStr);
+  } catch (e) {
+    print('日期解析失败: $dateStr, 错误: $e');
+    return DateTime.now();
+  }
+}
+
+// 格式化为完整日期（yyyy.MM.dd）
+String _formatToFullDate(String dateStr) {
+  try {
+    final date = _parseDate(dateStr);
+    return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
+  } catch (e) {
+    print('日期格式化失败: $dateStr, 错误: $e');
+    return dateStr;
+  }
+}
+
+// 格式化为年月（yyyy.MM）
+String _formatToMonth(String dateStr) {
+  try {
+    final date = _parseDate(dateStr);
+    return '${date.year}.${date.month.toString().padLeft(2, '0')}';
+  } catch (e) {
+    print('月份格式化失败: $dateStr, 错误: $e');
+    return dateStr;
   }
 }
