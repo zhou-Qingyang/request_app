@@ -10,6 +10,7 @@ import 'package:quest_app/page/analysis/payment.dart';
 import 'package:quest_app/page/order/order.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
 import 'package:quest_app/page/withDraw/with_draw.dart';
+import 'package:quest_app/provider/analysis_state.dart';
 import 'package:quest_app/provider/route_state.dart';
 
 import '../../helper/style.dart';
@@ -31,6 +32,18 @@ class DataCenterInfo {
     required this.data,
     required this.lastData,
   });
+
+  DataCenterInfo copyWith({
+    String? dataKey,    // 可选参数，默认null
+    String? data,       // 可选参数，默认null
+    String? lastData,   // 可选参数，默认null
+  }) {
+    return DataCenterInfo(
+      dataKey: dataKey ?? this.dataKey,
+      data: data ?? this.data,
+      lastData: lastData ?? this.lastData,
+    );
+  }
 }
 
 class IconDataCenterInfo {
@@ -78,18 +91,13 @@ class _CenterPageState extends State<CenterPage> {
     super.initState();
     _startAutoScroll();
     datas = [
-      DataCenterInfo(dataKey: '能力分', data: '待评估', lastData: '昨日 --'),
+      DataCenterInfo(dataKey: '能力分', data: '188', lastData: '昨日 --'),
       DataCenterInfo(dataKey: '本月税前收益', data: '0.00', lastData: '上月  0.00'),
-      DataCenterInfo(dataKey: '成长值', data: '0', lastData: '本周  0'),
+      DataCenterInfo(dataKey: '成长值', data: '88', lastData: '本周  0'),
     ];
 
     iconData = [
-      IconDataCenterInfo("assets/icons/1.png", "情感星球", () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => WithDrawPage()),
-        );
-      }),
+      IconDataCenterInfo("assets/icons/1.png", "情感星球", () {}),
       IconDataCenterInfo("assets/icons/2.png", "数据分析", () {
         Navigator.push(
           context,
@@ -105,18 +113,12 @@ class _CenterPageState extends State<CenterPage> {
           MaterialPageRoute(builder: (context) => OrderPage()),
         );
       }),
-      IconDataCenterInfo("assets/icons/5.png", "成长中心", () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => PaymentPage()),
-        );
-      }),
+      IconDataCenterInfo("assets/icons/5.png", "成长中心", () {}),
       IconDataCenterInfo("assets/icons/6.png", "问币商城", () {}),
       IconDataCenterInfo("assets/icons/7.png", "我的周报", () {}),
       IconDataCenterInfo("assets/icons/8.png", "答主学院", () {}),
       IconDataCenterInfo("assets/icons/9.png", "我的主页", () {}),
       IconDataCenterInfo("assets/icons/10.png", "应用中心", () {}),
-
       IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
       IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
       IconDataCenterInfo("assets/icons/1.png", "应用中心", () {}),
@@ -171,6 +173,10 @@ class _CenterPageState extends State<CenterPage> {
   }
 
   Widget _buildHeadDataCenter() {
+    final double preTaxProfit = context.select(
+          (AnalysisState r) => r.preTaxProfit,
+    );
+    datas[1] = datas[1].copyWith(data: preTaxProfit.toString());
     final int itemsPerPage = 10;
     final int pageCount = (iconData.length / itemsPerPage).ceil();
     return Stack(
@@ -190,11 +196,14 @@ class _CenterPageState extends State<CenterPage> {
             ),
           ),
           height: 200,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(
-              datas.length,
-              (index) => _buildDataItem(datas[index], index),
+          child: Padding(
+            padding:  EdgeInsets.only(top: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(
+                datas.length,
+                (index) => _buildDataItem(datas[index], index),
+              ),
             ),
           ),
         ),
@@ -217,7 +226,7 @@ class _CenterPageState extends State<CenterPage> {
             child: Column(
               children: [
                 Container(
-                  padding: EdgeInsets.only( left: 6, right: 6),
+                  padding: EdgeInsets.only(left: 6, right: 6),
                   height: 160,
                   child: PageView.builder(
                     controller: _pageController,
@@ -496,27 +505,27 @@ class _CenterPageState extends State<CenterPage> {
               data.dataKey,
               style: TextStyle(
                 color: Styles.grayFontColor,
-                fontSize: index == 1 ? 16.sp : 14.sp,
+                fontSize: 12.sp,
               ),
             ),
             SizedBox(width: 4.w),
             Icon(
               Icons.help_outline,
               color: Styles.grayFontColor,
-              size: index == 1 ? 14.sp : 12.sp,
+              size: 12.sp,
             ),
           ],
         ),
-        SizedBox(height: index == 1 ? 10 : 10),
+        const SizedBox(height: 10,),
         Text(
           data.data,
           style: TextStyle(
             color: Colors.white,
-            fontSize: index == 1 ? 26.sp : 18.sp,
+            fontSize: 21.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: index == 1 ? 10 : 10),
+        const SizedBox(height: 10),
         index == 1
             ? Row(
                 mainAxisSize: MainAxisSize.min,
@@ -524,19 +533,19 @@ class _CenterPageState extends State<CenterPage> {
                 children: [
                   Text(
                     data.lastData,
-                    style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                    style: TextStyle(color: Colors.white, fontSize: 12.sp),
                   ),
-                  SizedBox(width: 4.w),
+                  SizedBox(width: 2.w),
                   Icon(
                     Icons.help_outline,
                     color: Styles.grayFontColor,
-                    size: index == 1 ? 14.sp : 12.sp,
+                    size: 12.sp,
                   ),
                 ],
               )
             : Text(
                 data.lastData,
-                style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                style: TextStyle(color: Colors.white, fontSize: 12.sp),
               ),
       ],
     );

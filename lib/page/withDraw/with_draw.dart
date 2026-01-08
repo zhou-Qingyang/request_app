@@ -9,6 +9,7 @@ import 'package:quest_app/page/withDraw/withDraw_edit.dart';
 import 'package:quest_app/provider/accept_state.dart';
 import 'package:quest_app/provider/order_state.dart';
 import '../../helper/style.dart';
+import '../widgets/svg_button.dart';
 
 class WithDrawPage extends StatefulWidget {
   const WithDrawPage({super.key});
@@ -91,7 +92,7 @@ class _WithDrawPageState extends State<WithDrawPage> {
                                     },
                                   ),
                                   const SizedBox(width: 20),
-                                  _createButton2(CupertinoIcons.cube, () {}),
+                                  Image.asset("assets/icons/16.png",width: 18.sp,height: 18.sp,color: Colors.white,)
                                 ],
                               ),
                             ),
@@ -110,25 +111,33 @@ class _WithDrawPageState extends State<WithDrawPage> {
                                 padding: EdgeInsets.only(left: 8, right: 8),
                                 height: _contentHeight * 0.6,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(
-                                    20,
-                                  ), // 可选：添加圆角
+                                    color:Colors.black87.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20), // 可选：添加圆角
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _createButton(CupertinoIcons.cube, () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              WithDrawEditPage(),
-                                        ),
-                                      );
-                                    }),
-                                    _buildDivider(),
-                                    _createButton(CupertinoIcons.cube, () {}),
+                                    SvgIconButton(
+                                      assetName: 'assets/svg/more.svg',
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                WithDrawEditPage(),
+                                          ),
+                                        );
+                                      },
+                                      color: Colors.white,
+                                      iconSize: 14.sp,
+                                    ),
+                                    const SizedBox(width: 12,),
+                                    SvgIconButton(
+                                      assetName: 'assets/svg/close.svg',
+                                      onPressed: () {},
+                                      color: Colors.white,
+                                      iconSize: 14.sp,
+                                    ),
                                   ],
                                 ),
                               ),

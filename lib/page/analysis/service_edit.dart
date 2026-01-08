@@ -15,24 +15,6 @@ class DataManagementPage extends StatefulWidget {
 }
 
 class _DataManagementPageState extends State<DataManagementPage> {
-  // List<ServiceDataInfo> _serviceData = [
-  //   ServiceDataInfo(1, "订单量", 1250, 980),
-  //   ServiceDataInfo(2, "5分钟响应率", 3456, 3102),
-  //   ServiceDataInfo(3, "好评数", 8920, 7543),
-  //   ServiceDataInfo(4, "差评数", 2178, 2045),
-  //   ServiceDataInfo(5, "复购数", 567, 489),
-  //   ServiceDataInfo(6, "不限时奖励单", 4321, 4156),
-  // ];
-  // int _quoteOrderLimit = 100;
-  // int get quoteOrderLimit => _quoteOrderLimit;
-  // Map<String, int> _hexagonData = {
-  //   '用户反馈': 85,
-  //   '服务表现': 92,
-  //   '复购表现': 78,
-  //   '内容质量': 95,
-  //   '响应速度': 88,
-  //   '原创表现': 73,
-  // };
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +38,9 @@ class _DataManagementPageState extends State<DataManagementPage> {
       body: ListView(
         padding: EdgeInsets.only(top: paddingHeight, left: 10.w, right: 10.w),
         children: [
+          _buildSectionTitle('本月税前收益'),
+          _buildPreTaxProfitCard(),
+          SizedBox(height: 20.h),
           _buildSectionTitle('服务数据管理'),
           _buildServiceDataCard(),
           SizedBox(height: 20.h),
@@ -226,6 +211,103 @@ class _DataManagementPageState extends State<DataManagementPage> {
                       ServiceDataInfo(
                           serviceData.id, serviceData.title, data, lateDayData));
 
+                  Navigator.pop(context);
+                  _showSnackBar('修改成功');
+                },
+                child: Text(
+                  '保存',
+                  style: TextStyle(
+                      fontSize: 14.sp, color: const Color(0xFF3f6ff4)),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildPreTaxProfitCard() {
+    final double preTaxProfit = context.select((
+        AnalysisState a) => a.preTaxProfit);
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: ListTile(
+        title: Text(
+          '本月税前收益',
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+        ),
+        subtitle: Text(
+          '本月税前收益: $preTaxProfit 元',
+          style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.edit, size: 20, color: const Color(0xFF3f6ff4)),
+          onPressed: () => _openPreTaxProfitDialog(preTaxProfit),
+        ),
+      ),
+    );
+  }
+
+  void _openPreTaxProfitDialog(double preTaxProfit) {
+    final limitCtrl = TextEditingController(text: preTaxProfit.toString());
+    showDialog(
+      context: context,
+      builder: (context) =>
+          AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text(
+              '编辑本月税前收益',
+              style: TextStyle(fontSize: 16.sp, color: Colors.black87),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('本月税前收益上限'),
+                SizedBox(height: 8.h),
+                TextField(
+                  controller: limitCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: '请输入本月税前收益上限',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    suffixText: '元',
+                  ),
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('取消', style: TextStyle(fontSize: 14.sp)),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (limitCtrl.text.isEmpty) {
+                    _showSnackBar('本月税前收益上限不能为空');
+                    return;
+                  }
+                  final limit = double.tryParse(limitCtrl.text);
+                  if (limit == null || limit < 0) {
+                    _showSnackBar('请输入有效的数字（≥0）');
+                    return;
+                  }
+                  context.read<AnalysisState>().updatePreTaxProfit(limit);
                   Navigator.pop(context);
                   _showSnackBar('修改成功');
                 },

@@ -7,11 +7,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quest_app/model/question.dart';
+import 'package:quest_app/page/analysis/payment.dart';
 import 'package:quest_app/page/analysis/question_edit.dart';
 import 'package:quest_app/page/widgets/main_appbar.dart';
 import 'package:quest_app/page/widgets/svg_button.dart';
 import 'package:quest_app/provider/analysis_state.dart';
 import '../../helper/style.dart';
+import '../withDraw/with_draw.dart';
 import 'analysis_appbar.dart';
 
 class AnalysisData {
@@ -200,6 +202,9 @@ class _AnalysisState extends State<Analysis> {
     final List<QuestionInfo> questions = context.select(
       (AnalysisState r) => r.questions,
     );
+    final double preTaxProfit = context.select(
+        (AnalysisState r) => r.preTaxProfit,
+    );
     return Expanded(
       child: PageView.builder(
         controller: _pageController,
@@ -219,7 +224,7 @@ class _AnalysisState extends State<Analysis> {
               hexagonData,
             );
           } else if (index == 2) {
-            return _buildIncomeAnalysisPage(questions);
+            return _buildIncomeAnalysisPage(questions,preTaxProfit);
           }
           return Container(
             alignment: Alignment.center,
@@ -556,7 +561,7 @@ class _AnalysisState extends State<Analysis> {
         (sortedDates.length * rowHeight) +
         paddingHeight +
         10;
-    final double finalHeight = tableHeight.clamp(200.0, 600.0);
+    final double finalHeight = tableHeight.clamp(200.0, 700.0);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
       child: Container(
@@ -746,16 +751,11 @@ class _AnalysisState extends State<Analysis> {
         acceptTime: _formatToFullDate(question.acceptTime),
       );
     }).toList();
-
-    // const dateFormatPattern = 'yyyy-MM-dd'; // 修改为标准格式
-    // final dateFormat = DateFormat(dateFormatPattern);
     final sortedQuestions = List<QuestionInfo>.from(processedQuestions)
       ..sort((a, b) {
-        // final dateA = dateFormat.parse(a.acceptTime);
-        // final dateB = dateFormat.parse(b.acceptTime);
-        final dateCompare = b.expectedPaymentTime.compareTo(a.expectedPaymentTime);
+        final dateCompare = b.acceptTime.compareTo(a.acceptTime);
         if (dateCompare == 0) {
-          return b.id.compareTo(a.id); // ID大的在前
+          return b.id.compareTo(a.id);
         }
         return dateCompare;
       });
@@ -1390,7 +1390,7 @@ class _AnalysisState extends State<Analysis> {
     );
   }
 
-  Widget _buildIncomeAnalysisPage(List<QuestionInfo> questions) {
+  Widget _buildIncomeAnalysisPage(List<QuestionInfo> questions,double preTaxProfit) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1467,7 +1467,7 @@ class _AnalysisState extends State<Analysis> {
                     ),
                   ),
                   Text(
-                    "0.00",
+                    preTaxProfit.toString(),
                     style: TextStyle(
                       fontSize: 24.sp,
                       color: Colors.white,
@@ -1508,17 +1508,125 @@ class _AnalysisState extends State<Analysis> {
                         style: TextStyle(fontSize: 12.sp, color: Colors.white),
                       ),
                       const Spacer(),
-                      Text(
-                        "打款明细",
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: Color(0xFFc0dcff),
-                          fontWeight: FontWeight.bold,
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PaymentPage()),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          splashFactory: NoSplash.splashFactory,
+                          backgroundColor: Colors.transparent, // 透明背景
+                          shadowColor: Colors.transparent,     // 无阴影
+                          shape: RoundedRectangleBorder(       // 无圆角/边框
+                            borderRadius: BorderRadius.zero,
+                          ),
+                        ),
+                        child: Text(
+                          "打款明细",
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: Color(0xFFc0dcff),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 6),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            builder: (BuildContext context) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(10.r),
+                                    topRight: Radius.circular(10.r),
+                                  ),
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 10.h),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min, // 只占最小高度
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => WithDrawPage()),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: double.infinity, // 宽度铺满
+                                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                                        alignment: Alignment.center, // 文字居中
+                                        child: Text(
+                                          '抢单及奖励收益提现',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Color(0xFF333333),
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 1,
+                                      color: Color(0xFFf5f5f5),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => WithDrawPage()),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: double.infinity, // 宽度铺满
+                                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                                        alignment: Alignment.center, // 文字居中
+                                        child: Text(
+                                          '定向及围观收益提现',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Color(0xFF333333),
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 10,
+                                      color: Color(0xFFf5f5f5),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          '取消',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Color(0xFF333333),
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Color(0xFF3f6ff4),
@@ -1984,7 +2092,6 @@ DateTime _parseDate(String dateStr) {
         parts.length >= 3 ? int.parse(parts[2]) : 1,
       );
     }
-
     // 尝试直接解析
     return DateTime.parse(dateStr);
   } catch (e) {

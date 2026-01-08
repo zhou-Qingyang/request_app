@@ -38,6 +38,14 @@ class AnalysisState extends ChangeNotifier {
   List<AnalysisData> get analyses => _analyses;
   Map<String, int> get hexagonData => _hexagonData;
 
+  double _preTaxProfit = 122.0;
+  double get preTaxProfit => _preTaxProfit;
+
+  void updatePreTaxProfit(double profit) {
+    _preTaxProfit = profit;
+    notifyListeners();
+  }
+
   void _generate30DaysData() {
     final List<AnalysisData> data = [];
     final now = DateTime.now();
@@ -139,7 +147,7 @@ class AnalysisState extends ChangeNotifier {
       '多语言切换问题',
       '暗黑模式适配问题',
     ];
-    _questions = List. generate(10, (index) {
+    _questions = List.generate(10, (index) {
       final now = DateTime.now();
       final acceptTime = now.subtract(Duration(days: random.nextInt(30)));
       final paymentTime = acceptTime.add(Duration(days: random.nextInt(15) + 5));
@@ -151,7 +159,7 @@ class AnalysisState extends ChangeNotifier {
         paymentAmount: (random.nextInt(5000) + 1000).toDouble(),
       );
     });
-    _questions.sort((a, b) => b.expectedPaymentTime.compareTo(a.expectedPaymentTime));
+    _questions.sort((a, b) => b.acceptTime.compareTo(a.acceptTime));
     notifyListeners();
   }
 

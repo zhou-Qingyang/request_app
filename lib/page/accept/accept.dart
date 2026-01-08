@@ -82,7 +82,7 @@ class _AcceptPageState extends State<AcceptPage> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage("assets/images/bg.png"),
-                        fit: BoxFit.cover, // 图片适配方式（关键，下文详解）
+                        fit: BoxFit.cover,
                       ),
                     ),
                     child: Column(
@@ -152,33 +152,49 @@ class _AcceptPageState extends State<AcceptPage> {
                               horizontal: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Styles.themeEndColor,
+                              color: Color(0xFFf6f9fe),
                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                Image.asset("assets/icons/18.png",width: 16,height: 16,),
                                 Text(
-                                  "恭喜",
+                                  "进阶课程",
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: Styles.orgFontColor,
+                                    color: Color(0xFF3770eb),
                                   ),
                                 ),
                                 _buildDivider(),
                                 Text(
-                                  "Lv.1 见习答主+10题",
+                                  "收入提高第一步  答题公式要记牢",
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: Styles.mainFontColor,
                                   ),
                                 ),
                                 const Spacer(),
-                                Icon(
-                                  Icons.close,
-                                  color: Styles.chevronRightIconColor,
-                                  size: 14.sp,
+                                TextButton(
+                                  onPressed: () {
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    splashFactory: NoSplash.splashFactory,
+                                    backgroundColor: Colors.transparent, // 透明背景
+                                    shadowColor: Colors.transparent,     // 无阴影
+                                    shape: RoundedRectangleBorder(       // 无圆角/边框
+                                      borderRadius: BorderRadius.zero,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "更多",
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: Color(0xFF3770eb),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -188,13 +204,25 @@ class _AcceptPageState extends State<AcceptPage> {
                         Padding(
                           padding: EdgeInsets.only(left: 10.w, right: 10.w),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Expanded(
                                 flex: 4,
-                                child: DotProgressBar(
-                                  progress: 0,
-                                  height: 10,
-                                  dotSize: 8,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    DotProgressBar(
+                                      progress: 0,
+                                      height: 10,
+                                      dotSize: 8,
+                                    ),
+                                    // Container(
+                                    //   decoration: BoxDecoration(
+                                    //     color: Colors.white
+                                    //   ),
+                                    //   child: Text("20提"),
+                                    // )
+                                  ],
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -325,11 +353,11 @@ class _AcceptPageState extends State<AcceptPage> {
             RichText(
               text: TextSpan(
                 children: [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 4.w),
-                      child: Icon(Icons.add, size: 14.sp, color: Colors.red),
+                  TextSpan(
+                    text: "¥ ",
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      color: Colors.red,
                     ),
                   ),
                   TextSpan(
@@ -343,7 +371,7 @@ class _AcceptPageState extends State<AcceptPage> {
                     alignment: PlaceholderAlignment.middle,
                     child: Padding(
                       padding: EdgeInsets.only(left: 2.w, right: 2.w),
-                      child: Icon(Icons.add, size: 14.sp, color: Colors.red),
+                      child: Icon(Icons.add, size: 12.sp, color: Colors.red),
                     ),
                   ),
                   TextSpan(
@@ -359,11 +387,7 @@ class _AcceptPageState extends State<AcceptPage> {
             const Spacer(),
             Row(
               children: [
-                Icon(
-                  Icons.source,
-                  size: 14.sp,
-                  color: Styles.themeStartColor,
-                ),
+                Image.asset("assets/icons/20.png",width: 16,height: 16,),
                 SizedBox(width: 4.w),
                 Text(
                   "去抢单",

@@ -61,7 +61,7 @@ class QuestionListPage extends StatelessWidget {
             padding: EdgeInsets.all(16.w),
             itemCount: provider.questions.length,
             itemBuilder: (context, index) {
-              final question = provider. questions[index];
+              final question = provider.questions[index];
               return _buildQuestionCard(context, question);
             },
           );
